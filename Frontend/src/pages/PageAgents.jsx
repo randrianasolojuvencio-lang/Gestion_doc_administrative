@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
+import { CircleCheck, CircleAlert, UserPlus, KeyRound, UserX, UserCheck } from 'lucide-react';
 import {
   listerAgents, creerAgent, reinitialiserMotDePasse, changerEtatAgent,
 } from '../services/serviceApi';
+import './PageAgents.css';
 
 const FORMULAIRE_VIDE = {
   cin_personnel: '', nom_personnel: '', prenom_personnel: '',
@@ -9,7 +11,7 @@ const FORMULAIRE_VIDE = {
 };
 
 // Liste des agents, ajout d'un agent, réinitialisation de mot de passe, activation
-export default function PageAgents({ agentConnecte, retour }) {
+export default function PageAgents({ agentConnecte }) {
   const [agents, setAgents] = useState([]);
   const [formulaire, setFormulaire] = useState(FORMULAIRE_VIDE);
   const [erreur, setErreur] = useState('');
@@ -86,54 +88,87 @@ export default function PageAgents({ agentConnecte, retour }) {
     }
   }
 
-  return (
-    <div className="carte large">
-      <h2>Agents de la scolarité</h2>
-      <button className="secondaire" onClick={retour}>← Retour</button>
+   return (
+    <div className="page-contenu">
+      <header className="en-tete-page">
+        <div>
+          <h1>Agents de la scolarité</h1>
+          <p className="sous-titre">
+            Ajoutez un agent, réinitialisez un mot de passe ou désactivez un compte.
+          </p>
+        </div>
+      </header>
 
+      {/* Message de succès : le mot de passe provisoire, affiché une seule fois */}
       {motDePasseAffiche && (
-        <div className="alerte">
-          <p>Mot de passe provisoire de <strong>{motDePasseAffiche.email}</strong> :</p>
-          <p className="mot-de-passe">{motDePasseAffiche.motDePasse}</p>
-          <p>À donner à l'agent. Il ne sera plus affiché.</p>
+        <div className="message-succes" role="status">
+          <CircleCheck size={20} aria-hidden="true" />
+          <div>
+            <p className="sans-marge">
+              Mot de passe provisoire de <strong>{motDePasseAffiche.email}</strong> :
+            </p>
+            <p className="mot-de-passe">{motDePasseAffiche.motDePasse}</p>
+            <p className="sans-marge">À donner à l'agent. Il ne sera plus affiché.</p>
+          </div>
         </div>
       )}
 
-      <h3>Ajouter un agent</h3>
-      <form onSubmit={ajouterAgent} className="formulaire-agent">
-        <input name="cin_personnel" placeholder="CIN (12 chiffres)" maxLength={12} value={formulaire.cin_personnel} onChange={modifierChamp} required />
-        <input name="nom_personnel" placeholder="Nom" value={formulaire.nom_personnel} onChange={modifierChamp} required />
-        <input name="prenom_personnel" placeholder="Prénom" value={formulaire.prenom_personnel} onChange={modifierChamp} />
-        <input name="telephone_personnel" placeholder="Téléphone" maxLength={15} value={formulaire.telephone_personnel} onChange={modifierChamp} />
-        <input name="email_personnel" type="email" placeholder="E-mail" value={formulaire.email_personnel} onChange={modifierChamp} required />
-        <button>Enregistrer l'agent</button>
-      </form>
-      {erreur && <p className="erreur">{erreur}</p>}
+      {erreur && (
+        <div className="message-erreur" role="alert">
+          <CircleAlert size={20} aria-hidden="true" />
+          <span>{erreur}</span>
+        </div>
+      )}
 
-      <table>
-        <thead>
-          <tr><th>Nom</th><th>E-mail</th><th>Téléphone</th><th>État</th><th>Actions</th></tr>
-        </thead>
-        <tbody>
-          {agents.map((agent) => {
-            const estMoi = agent.cin_personnel === agentConnecte.cin_personnel;
-            return (
-              <tr key={agent.cin_personnel}>
-                <td>{agent.prenom_personnel} {agent.nom_personnel}</td>
-                <td>{agent.email_personnel}</td>
-                <td>{agent.telephone_personnel}</td>
-                <td>{agent.actif ? 'Actif' : 'Désactivé'}</td>
-                <td>
-                  <button className="petit" disabled={estMoi} onClick={() => reinitialiser(agent)}>Réinitialiser</button>
-                  <button className="petit" disabled={estMoi} onClick={() => basculerEtat(agent)}>
-                    {agent.actif ? 'Désactiver' : 'Activer'}
-                  </button>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+      <section className="panneau">
+        <h2>Ajouter un agent</h2>
+        <form onSubmit={ajouterAgent} className="formulaire-agent">
+          <input name="cin_personnel" placeholder="CIN (12 chiffres)" maxLength={12} value={formulaire.cin_personnel} onChange={modifierChamp} required />
+          <input name="nom_personnel" placeholder="Nom" value={formulaire.nom_personnel} onChange={modifierChamp} required />
+          <input name="prenom_personnel" placeholder="Prénom" value={formulaire.prenom_personnel} onChange={modifierChamp} />
+          <input name="telephone_personnel" placeholder="Téléphone" maxLength={15} value={formulaire.telephone_personnel} onChange={modifierChamp} />
+          <input name="email_personnel" type="email" placeholder="E-mail" value={formulaire.email_personnel} onChange={modifierChamp} required />
+          <button className="bouton">
+            <UserPlus size={18} aria-hidden="true" /> Enregistrer
+          </button>
+        </form>
+      </section>
+
+      <section className="panneau">
+        <h2>Liste des agents</h2>
+        <table className="tableau">
+          <thead>
+            <tr><th>Nom</th><th>E-mail</th><th>Téléphone</th><th>État</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            {agents.map((agent) => {
+              const estMoi = agent.cin_personnel === agentConnecte.cin_personnel;
+              return (
+                <tr key={agent.cin_personnel}>
+                  <td>{agent.prenom_personnel} {agent.nom_personnel}</td>
+                  <td>{agent.email_personnel}</td>
+                  <td>{agent.telephone_personnel}</td>
+                  <td>
+                    <span className={agent.actif ? 'etat etat-actif' : 'etat etat-inactif'}>
+                      {agent.actif ? 'Actif' : 'Désactivé'}
+                    </span>
+                  </td>
+                  <td className="actions">
+                    <button className="bouton bouton-secondaire bouton-petit" disabled={estMoi} onClick={() => reinitialiser(agent)}>
+                      <KeyRound size={15} aria-hidden="true" /> Réinitialiser
+                    </button>
+                    <button className="bouton bouton-secondaire bouton-petit" disabled={estMoi} onClick={() => basculerEtat(agent)}>
+                      {agent.actif
+                        ? <><UserX size={15} aria-hidden="true" /> Désactiver</>
+                        : <><UserCheck size={15} aria-hidden="true" /> Activer</>}
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </section>
     </div>
   );
 }

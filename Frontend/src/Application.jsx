@@ -1,15 +1,18 @@
 import { useEffect, useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { obtenirProfil, seDeconnecter } from './services/serviceApi';
+import MiseEnPage from './composants/MiseEnPage';
 import PageConnexion from './pages/PageConnexion';
 import PageChangementMotDePasse from './pages/PageChangementMotDePasse';
 import PageAccueil from './pages/PageAccueil';
+import PageDemandes from './pages/PageDemandes';
+import PageEtudiants from './pages/PageEtudiants';
 import PageAgents from './pages/PageAgents';
 
-// Composant principal : choisit la page à afficher selon l'état de l'agent
+// Composant principal : choisit ce qu'on affiche selon l'état de l'agent
 export default function Application() {
-  const [agent, setAgent] = useState(null);   // agent connecté, ou null
-  const [pret, setPret] = useState(false);    // vrai quand la session a été vérifiée
-  const [page, setPage] = useState('accueil');
+  const [agent, setAgent] = useState(null);  // agent connecté, ou null
+  const [pret, setPret] = useState(false);   // vrai quand la session a été vérifiée
 
   // Au chargement, on regarde si une session est déjà ouverte
   useEffect(() => {
@@ -22,25 +25,31 @@ export default function Application() {
   async function deconnecter() {
     await seDeconnecter();
     setAgent(null);
-    setPage('accueil');
   }
 
-  if (!pret) return <p className="carte">Chargement…</p>;
+  if (!pret) return <p className="chargement">Chargement…</p>;
+
+  // Pas connecté : page de connexion
   if (!agent) return <PageConnexion surConnexion={setAgent} />;
 
+  // Mot de passe provisoire : l'agent doit d'abord en choisir un nouveau
   if (agent.doit_changer_mot_de_passe) {
     return <PageChangementMotDePasse agent={agent} surChangement={setAgent} />;
   }
 
-  if (page === 'agents') {
-    return <PageAgents agentConnecte={agent} retour={() => setPage('accueil')} />;
-  }
-
+  // Connecté : menu à gauche, et une page par adresse
   return (
-    <PageAccueil
-      agent={agent}
-      ouvrirAgents={() => setPage('agents')}
-      surDeconnexion={deconnecter}
-    />
+    <BrowserRouter>
+      <Routes>
+        <Route element={<MiseEnPage agent={agent} surDeconnexion={deconnecter} />}>
+          <Route path="/" element={<PageAccueil agent={agent} />} />
+          <Route path="/demandes" element={<PageDemandes />} />
+          <Route path="/etudiants" element={<PageEtudiants />} />
+          <Route path="/agents" element={<PageAgents agentConnecte={agent} />} />
+        </Route>
+        {/* Toute autre adresse ramène au tableau de bord */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }

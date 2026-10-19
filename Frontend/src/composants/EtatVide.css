@@ -1,0 +1,4 @@
+.etat-vide { display: flex; flex-direction: column; align-items: center; padding: 2.5rem 1rem; text-align: center; color: var(--couleur-secondaire); }
+.etat-vide-icone { display: grid; place-items: center; width: 56px; height: 56px; margin-bottom: 1rem; border-radius: 50%; background: var(--couleur-accent-clair); color: var(--couleur-accent); }
+.etat-vide h3 { margin-bottom: .3rem; color: var(--couleur-texte); font-size: 1.05rem; }
+.etat-vide p { max-width: 380px; margin: 0; font-size: .92rem; }

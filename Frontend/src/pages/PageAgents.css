@@ -1,0 +1,13 @@
+.formulaire-agent { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: .7rem; align-items: center; }
+.formulaire-agent input { padding: .65rem; border: 1px solid var(--couleur-bordure); border-radius: 8px; font-size: .95rem; }
+.formulaire-agent input:focus { outline: 2px solid var(--couleur-accent); outline-offset: 1px; }
+
+.sans-marge { margin: 0; }
+.mot-de-passe { margin: .3rem 0; font-family: monospace; font-size: 1.6rem; letter-spacing: .1em; }
+
+/* Pastilles d'état : tons neutres (le vert est réservé aux boutons et succès) */
+.etat { display: inline-block; padding: .15rem .6rem; border-radius: 999px; font-size: .8rem; font-weight: 600; }
+.etat-actif { background: var(--couleur-accent-clair); color: var(--couleur-accent); }
+.etat-inactif { background: var(--couleur-erreur-fond); color: var(--couleur-erreur); }
+
+.actions { display: flex; gap: .4rem; flex-wrap: wrap; }

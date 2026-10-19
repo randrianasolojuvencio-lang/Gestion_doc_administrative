@@ -1,0 +1,27 @@
+/* Couleurs de tout le site : on les change ici, une seule fois */
+:root {
+  /* Fond et texte (thème clair) */
+  --couleur-fond: #f2f6fc;
+  --couleur-surface: #ffffff;
+  --couleur-texte: #1f2d44;
+  --couleur-secondaire: #5b6b82;
+  --couleur-bordure: #d9e1ee;
+
+  /* Bleu marine clair : menu, logo, liens, contours, boutons secondaires */
+  --couleur-accent: #3a5a8c;
+  --couleur-accent-fonce: #2c4670;
+  --couleur-accent-clair: #e6edf8;
+
+  /* Vert : réservé aux boutons d'action et aux messages de succès */
+  --couleur-bouton: #1a7f52;
+  --couleur-succes-fond: #e4f4ec;
+  --couleur-succes-texte: #14653f;
+
+  /* Erreurs */
+  --couleur-erreur: #b3261e;
+  --couleur-erreur-fond: #fdecea;
+
+  /* Noms utilisés par la page de connexion */
+  --couleur-principale: var(--couleur-accent);
+  --couleur-principale-fonce: var(--couleur-accent-fonce);
+}

@@ -1,50 +1,25 @@
-body { font-family: system-ui, sans-serif; margin: 0; background: #f4f6f8; color: #1d2733; }
+/* Styles de la page de connexion (PageConnexion.jsx) */
 
-.carte { max-width: 380px; margin: 10vh auto; background: #fff; padding: 2rem; border-radius: 12px; box-shadow: 0 2px 12px rgba(0, 0, 0, .08); }
-.carte.large { max-width: 900px; margin: 4vh auto; }
-.carte label { display: block; margin: .8rem 0 .3rem; font-size: .9rem; }
-.carte input { width: 100%; padding: .6rem; border: 1px solid #c5ccd3; border-radius: 6px; box-sizing: border-box; }
-
-.carte button { margin-top: 1.2rem; width: 100%; padding: .7rem; border: 0; border-radius: 6px; background: #1f5fbf; color: #fff; font-size: 1rem; cursor: pointer; }
-.carte button.secondaire { background: #e5e9ee; color: #1d2733; }
-.carte button.petit { width: auto; margin: 0 .3rem 0 0; padding: .35rem .6rem; font-size: .85rem; }
-.carte button:disabled { opacity: .5; cursor: not-allowed; }
-
-.erreur { color: #b3261e; margin-top: .8rem; }
-.alerte { background: #fff4d6; border: 1px solid #e6c34a; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
-.mot-de-passe { font-family: monospace; font-size: 1.6rem; letter-spacing: .1em; margin: .3rem 0; }
-
-.formulaire-agent { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: .6rem; align-items: end; }
-.formulaire-agent button { margin-top: 0; }
-
-table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; font-size: .9rem; }
-th, td { text-align: left; padding: .5rem; border-bottom: 1px solid #e1e5ea; }
-
-/* ===== Couleurs communes ===== */
-:root {
-  --couleur-principale: #166a5b;
-  --couleur-principale-fonce: #114f44;
-  --couleur-fond: #f5f6f4;
-  --couleur-secondaire: #5b6773;
-  --couleur-bordure: #d5dbd9;
-  --couleur-erreur: #b3261e;
-}
-
-/* ===== Page de connexion ===== */
 .page-connexion { min-height: 100vh; display: flex; flex-direction: column; background: var(--couleur-fond); }
 
+/* Bandeau du haut */
 .connexion-entete { display: flex; justify-content: space-between; align-items: center; padding: .9rem 2rem; background: #fff; border-bottom: 1px solid var(--couleur-bordure); }
 .connexion-marque { display: flex; align-items: center; gap: .7rem; }
 .connexion-logo { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 8px; background: var(--couleur-principale); color: #fff; }
 .connexion-nom-ecole { font-size: .8rem; color: var(--couleur-secondaire); }
 .connexion-portail { font-size: .9rem; color: var(--couleur-secondaire); }
 
+/* Zone centrale et carte */
 .connexion-principal { flex: 1; display: grid; place-items: center; padding: 2rem 1rem; }
-.connexion-carte { width: 100%; max-width: 420px; box-sizing: border-box; background: #fff; border: 1px solid var(--couleur-bordure); border-radius: 14px; padding: 2rem; box-shadow: 0 4px 24px rgba(17, 79, 68, .08); }
-.connexion-carte h1 { margin: 0 0 .3rem; font-size: 1.7rem; }
-.connexion-intro { margin: 0 0 1.5rem; color: var(--couleur-secondaire); font-size: .95rem; }
+.connexion-carte { width: 100%; max-width: 420px; box-sizing: border-box; background: #fff; border: 1px solid var(--couleur-bordure); border-radius: 14px; padding: 2rem; box-shadow: 0 4px 24px rgba(20, 30, 45, .08); }
+.connexion-carte h1 { margin: 0 0 .3rem; font-size: 1.7rem; text-align: center; }
+.connexion-intro { margin: 0 0 1.5rem; color: var(--couleur-secondaire); font-size: .95rem; text-align: center; }
 .connexion-carte label { display: block; margin: 1rem 0 .4rem; font-size: .9rem; font-weight: 600; }
 
+/* Rond avec une personne à l'intérieur */
+.connexion-avatar { display: grid; place-items: center; width: 64px; height: 64px; margin: 0 auto 1rem; border-radius: 50%; background: var(--couleur-principale); color: #fff; box-shadow: 0 0 0 6px var(--couleur-accent-clair) }
+
+/* Champs de saisie avec icônes */
 .champ { position: relative; }
 .champ input { width: 100%; box-sizing: border-box; padding: .7rem 2.7rem; border: 1px solid var(--couleur-bordure); border-radius: 8px; font-size: 1rem; background: #fff; }
 .champ input:focus { outline: 2px solid var(--couleur-principale); outline-offset: 1px; border-color: var(--couleur-principale); }
@@ -52,14 +27,15 @@ th, td { text-align: left; padding: .5rem; border-bottom: 1px solid #e1e5ea; }
 .champ-bouton { position: absolute; right: .4rem; top: 50%; transform: translateY(-50%); display: grid; place-items: center; width: 34px; height: 34px; border: 0; border-radius: 6px; background: transparent; color: var(--couleur-secondaire); cursor: pointer; }
 .champ-bouton:hover { background: #eef1f0; }
 
+/* Mot de passe oublié, aide et erreur */
 .connexion-options { display: flex; justify-content: flex-end; margin-top: .7rem; }
 .lien { border: 0; background: none; padding: 0; color: var(--couleur-principale); font-size: .88rem; font-weight: 600; text-decoration: underline; cursor: pointer; }
-
-.connexion-aide { display: flex; gap: .6rem; margin-top: .8rem; padding: .8rem; border-radius: 8px; background: #eaf3f1; color: var(--couleur-principale-fonce); font-size: .88rem; }
+.connexion-aide { display: flex; gap: .6rem; margin-top: .8rem; padding: .8rem; border-radius: 8px; background: var(--couleur-accent); color: var(--couleur-principale-fonce); font-size: .88rem; }
 .connexion-erreur { display: flex; gap: .6rem; align-items: flex-start; margin-top: 1rem; padding: .8rem; border-radius: 8px; background: #fdecea; color: var(--couleur-erreur); font-size: .9rem; }
 
-.connexion-valider { display: flex; justify-content: center; align-items: center; gap: .5rem; width: 100%; margin-top: 1.4rem; padding: .8rem; border: 0; border-radius: 8px; background: var(--couleur-principale); color: #fff; font-size: 1rem; font-weight: 600; cursor: pointer; }
-.connexion-valider:hover:not(:disabled) { background: var(--couleur-principale-fonce); }
+/* Bouton de connexion */
+.connexion-valider { display: flex; justify-content: center; align-items: center; gap: .5rem; width: 100%; margin-top: 1.4rem; padding: .8rem; border: 2px solid var(--couleur-bouton); border-radius: 8px; background: #fff; color: var(--couleur-bouton); font-size: 1rem; font-weight: 600; cursor: pointer; transition: background-color .15s, color .15s; }
+.connexion-valider:hover:not(:disabled) { background: var(--couleur-bouton); color: #fff; }
 .connexion-valider:disabled { opacity: .7; cursor: wait; }
 
 .connexion-securite { display: flex; justify-content: center; align-items: center; gap: .4rem; margin: 1rem 0 0; font-size: .8rem; color: var(--couleur-secondaire); }
@@ -69,7 +45,7 @@ th, td { text-align: left; padding: .5rem; border-bottom: 1px solid #e1e5ea; }
 .tourner { animation: tourner 1s linear infinite; }
 @keyframes tourner { to { transform: rotate(360deg); } }
 
-/* Petit écran : bandeau et carte plus compacts */
+/* Petit écran */
 @media (max-width: 520px) {
   .connexion-entete { padding: .8rem 1rem; }
   .connexion-portail { display: none; }

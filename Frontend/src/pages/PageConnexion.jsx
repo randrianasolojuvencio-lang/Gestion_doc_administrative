@@ -2,8 +2,10 @@ import { useState } from 'react';
 import {
   GraduationCap, Mail, Lock, Eye, EyeOff, LogIn,
   LoaderCircle, CircleAlert, ShieldCheck, Info,
+  CircleUserRound,
 } from 'lucide-react';
 import { seConnecter } from '../services/serviceApi';
+import './PageConnexion.css';
 
 // Page de connexion des agents de la scolarité
 export default function PageConnexion({ surConnexion }) {
@@ -45,10 +47,13 @@ export default function PageConnexion({ surConnexion }) {
 
       <main className="connexion-principal">
         <form className="connexion-carte" onSubmit={soumettre}>
+          <div className="connexion-avatar">
+            <CircleUserRound size={34} aria-hidden="true" />
+          </div>
           <h1>Connexion</h1>
           <p className="connexion-intro">Accès réservé aux agents de la scolarité.</p>
 
-          <label htmlFor="champ-email">E-mail professionnel</label>
+          <label htmlFor="champ-email">E-mail</label>
           <div className="champ">
             <Mail size={18} className="champ-icone" aria-hidden="true" />
             <input
