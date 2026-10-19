@@ -1,7 +1,0 @@
-body { font-family: system-ui, sans-serif; margin: 0; background: #f4f6f8; color: #1d2733; }
-.carte { max-width: 380px; margin: 10vh auto; background: #fff; padding: 2rem; border-radius: 12px; box-shadow: 0 2px 12px rgba(0, 0, 0, .08); }
-.carte label { display: block; margin: .8rem 0 .3rem; font-size: .9rem; }
-.carte input { width: 100%; padding: .6rem; border: 1px solid #c5ccd3; border-radius: 6px; box-sizing: border-box; }
-.carte button { margin-top: 1.2rem; width: 100%; padding: .7rem; border: 0; border-radius: 6px; background: #1f5fbf; color: #fff; font-size: 1rem; cursor: pointer; }
-.carte button:disabled { opacity: .6; }
-.erreur { color: #b3261e; margin-top: .8rem; }
