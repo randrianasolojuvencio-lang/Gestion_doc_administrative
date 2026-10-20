@@ -1,17 +1,42 @@
+import { useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, FileText, GraduationCap, Users, LogOut, UserRound } from 'lucide-react';
+import {
+  LayoutDashboard, FileText, GraduationCap, Users, LogOut, UserRound, ChevronUp,
+} from 'lucide-react';
 import './MiseEnPage.css';
 
-// Les pages du menu : adresse, texte et icône
+// Les pages du menu principal : adresse, texte et icône
+// (la gestion des agents est rare : elle est dans le menu du profil)
 const ELEMENTS_MENU = [
   { chemin: '/', libelle: 'Tableau de bord', Icone: LayoutDashboard },
   { chemin: '/demandes', libelle: 'Demandes', Icone: FileText },
   { chemin: '/etudiants', libelle: 'Étudiants', Icone: GraduationCap },
-  { chemin: '/agents', libelle: 'Agents', Icone: Users },
 ];
 
 // Cadre commun à toutes les pages connectées : menu à gauche, page à droite
 export default function MiseEnPage({ agent, surDeconnexion }) {
+  const [menuProfilOuvert, setMenuProfilOuvert] = useState(false);
+  const zoneProfil = useRef(null);
+
+  // Ferme le menu du profil quand on clique ailleurs ou qu'on appuie sur Échap
+  useEffect(() => {
+    function fermerSiClicDehors(evenement) {
+      if (zoneProfil.current && !zoneProfil.current.contains(evenement.target)) {
+        setMenuProfilOuvert(false);
+      }
+    }
+    function fermerSiEchap(evenement) {
+      if (evenement.key === 'Escape') setMenuProfilOuvert(false);
+    }
+
+    document.addEventListener('mousedown', fermerSiClicDehors);
+    document.addEventListener('keydown', fermerSiEchap);
+    return () => {
+      document.removeEventListener('mousedown', fermerSiClicDehors);
+      document.removeEventListener('keydown', fermerSiEchap);
+    };
+  }, []);
+
   return (
     <div className="mise-en-page">
       <aside className="menu-lateral">
@@ -37,20 +62,46 @@ export default function MiseEnPage({ agent, surDeconnexion }) {
           ))}
         </nav>
 
-        <div className="menu-utilisateur">
-          <span className="menu-avatar"><UserRound size={18} aria-hidden="true" /></span>
-          <div className="menu-identite">
-            <strong>{agent.prenom_personnel} {agent.nom_personnel}</strong>
-            <span>{agent.email_personnel}</span>
-          </div>
+        {/* Profil de l'agent : un clic ouvre un petit menu discret */}
+        <div className="menu-profil" ref={zoneProfil}>
+          {menuProfilOuvert && (
+            <div className="menu-profil-liste" role="menu">
+              <NavLink
+                to="/agents"
+                className="menu-profil-element"
+                role="menuitem"
+                onClick={() => setMenuProfilOuvert(false)}
+              >
+                <Users size={16} aria-hidden="true" /> Gestion des agents
+              </NavLink>
+              <button
+                type="button"
+                className="menu-profil-element"
+                role="menuitem"
+                onClick={surDeconnexion}
+              >
+                <LogOut size={16} aria-hidden="true" /> Se déconnecter
+              </button>
+            </div>
+          )}
+
           <button
             type="button"
-            className="menu-deconnexion"
-            onClick={surDeconnexion}
-            aria-label="Se déconnecter"
-            title="Se déconnecter"
+            className="menu-utilisateur"
+            onClick={() => setMenuProfilOuvert(!menuProfilOuvert)}
+            aria-haspopup="menu"
+            aria-expanded={menuProfilOuvert}
           >
-            <LogOut size={18} />
+            <span className="menu-avatar"><UserRound size={18} aria-hidden="true" /></span>
+            <span className="menu-identite">
+              <strong>{agent.prenom_personnel} {agent.nom_personnel}</strong>
+              <span>{agent.email_personnel}</span>
+            </span>
+            <ChevronUp
+              size={16}
+              aria-hidden="true"
+              className={menuProfilOuvert ? 'menu-fleche' : 'menu-fleche fermee'}
+            />
           </button>
         </div>
       </aside>

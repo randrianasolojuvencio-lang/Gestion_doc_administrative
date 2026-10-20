@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
-import { CircleCheck, CircleAlert, UserPlus, KeyRound, UserX, UserCheck } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import {
+  CircleCheck, CircleAlert, UserPlus, KeyRound, UserX, UserCheck, ArrowLeft,
+} from 'lucide-react';
 import {
   listerAgents, creerAgent, reinitialiserMotDePasse, changerEtatAgent,
 } from '../services/serviceApi';
@@ -92,6 +95,9 @@ export default function PageAgents({ agentConnecte }) {
     <div className="page-contenu">
       <header className="en-tete-page">
         <div>
+          <Link to="/" className="lien-retour">
+            <ArrowLeft size={16} aria-hidden="true" /> Retour au tableau de bord
+          </Link>
           <h1>Agents de la scolarité</h1>
           <p className="sous-titre">
             Ajoutez un agent, réinitialisez un mot de passe ou désactivez un compte.

@@ -30,7 +30,7 @@
 /* Mot de passe oublié, aide et erreur */
 .connexion-options { display: flex; justify-content: flex-end; margin-top: .7rem; }
 .lien { border: 0; background: none; padding: 0; color: var(--couleur-principale); font-size: .88rem; font-weight: 600; text-decoration: underline; cursor: pointer; }
-.connexion-aide { display: flex; gap: .6rem; margin-top: .8rem; padding: .8rem; border-radius: 8px; background: var(--couleur-accent); color: var(--couleur-principale-fonce); font-size: .88rem; }
+.connexion-aide { display: flex; gap: .6rem; margin-top: .8rem; padding: .8rem; border-radius: 8px; background: transparent; color: var(--couleur-principale-fonce); font-size: .88rem; }
 .connexion-erreur { display: flex; gap: .6rem; align-items: flex-start; margin-top: 1rem; padding: .8rem; border-radius: 8px; background: #fdecea; color: var(--couleur-erreur); font-size: .9rem; }
 
 /* Bouton de connexion */

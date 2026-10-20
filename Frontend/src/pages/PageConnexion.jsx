@@ -107,7 +107,7 @@ export default function PageConnexion({ surConnexion }) {
               <Info size={18} aria-hidden="true" />
               <span>
                 Demandez à un collègue de la scolarité : il peut vous donner un nouveau
-                mot de passe provisoire depuis la page « Agents ».
+                mot de passe provisoire depuis « Gestion des agents », dans le menu de son profil.
               </span>
             </div>
           )}

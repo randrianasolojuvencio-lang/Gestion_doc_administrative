@@ -18,8 +18,8 @@ button { font: inherit; }
 
 /* ===== Boutons =====
    Au survol, la couleur du fond et celle du texte s'échangent. */
-.bouton { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; padding: .6rem 1.1rem; border: 2px solid var(--couleur-bouton); border-radius: 8px; background: var(--couleur-bouton); color: #fff; font-size: .95rem; font-weight: 600; text-decoration: none; cursor: pointer; transition: background-color .15s, color .15s; }
-.bouton:hover:not(:disabled) { background: #fff; color: var(--couleur-bouton); }
+.bouton { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; padding: .6rem 1.1rem; border: 2px solid var(--couleur-bouton); border-radius: 8px; background: #fff; color: var(--couleur-bouton); font-size: .95rem; font-weight: 600; text-decoration: none; cursor: pointer; transition: background-color .15s, color .15s; }
+.bouton:hover:not(:disabled) { background: var(--couleur-bouton); color: #fff; }
 .bouton:disabled { opacity: .5; cursor: not-allowed; }
 
 /* Bouton secondaire : blanc et bleu marine, il s'inverse au survol */

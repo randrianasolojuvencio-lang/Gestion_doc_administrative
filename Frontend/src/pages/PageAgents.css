@@ -11,3 +11,7 @@
 .etat-inactif { background: var(--couleur-erreur-fond); color: var(--couleur-erreur); }
 
 .actions { display: flex; gap: .4rem; flex-wrap: wrap; }
+
+/* Lien de retour vers le tableau de bord */
+.lien-retour { display: inline-flex; align-items: center; gap: .35rem; margin-bottom: .6rem; color: var(--couleur-accent); font-size: .88rem; font-weight: 600; text-decoration: none; }
+.lien-retour:hover { text-decoration: underline; }
