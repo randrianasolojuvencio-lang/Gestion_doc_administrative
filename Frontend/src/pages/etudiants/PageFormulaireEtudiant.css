@@ -1,0 +1,2 @@
+   .formulaire-etudiant fieldset { margin: 0 0 1.2rem; padding: 1rem 1.1rem 1.2rem; border: 1px solid var(--couleur-bordure); border-radius: 10px; }
+   .formulaire-etudiant legend { padding: 0 .4rem; color: var(--couleur-accent); font-weight: 600; }

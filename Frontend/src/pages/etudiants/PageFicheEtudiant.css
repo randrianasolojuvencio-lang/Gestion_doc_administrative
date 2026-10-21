@@ -1,0 +1,9 @@
+.liste-infos { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1rem 1.5rem; margin: 0; }
+.liste-infos dt { color: var(--couleur-secondaire); font-size: .8rem; }
+.liste-infos dd { margin: .1rem 0 0; font-weight: 500; }
+
+.en-tete-panneau { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.en-tete-panneau h2 { margin: 0; }
+
+.bloc-inscription { padding: 1.1rem; margin-bottom: 1.2rem; background: var(--couleur-fond); border: 1px solid var(--couleur-bordure); border-radius: 10px; }
+.mention { display: block; color: var(--couleur-secondaire); font-size: .8rem; }

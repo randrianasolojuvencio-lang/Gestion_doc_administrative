@@ -54,3 +54,7 @@ button { font: inherit; }
 .carte button { width: 100%; margin-top: 1.3rem; padding: .7rem; border: 2px solid var(--couleur-bouton); border-radius: 8px; background: var(--couleur-bouton); color: #fff; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background-color .15s, color .15s; }
 .carte button:hover { background: #fff; color: var(--couleur-bouton); }
 .erreur { margin-top: .8rem; color: var(--couleur-erreur); }
+
+/* ===== Contrôle des champs ===== */
+.champ-formulaire.invalide input, .champ-formulaire.invalide select { border-color: var(--couleur-erreur); background: var(--couleur-erreur-fond); }
+.erreur-champ { margin: .25rem 0 0; color: var(--couleur-erreur); font-size: .8rem; }
