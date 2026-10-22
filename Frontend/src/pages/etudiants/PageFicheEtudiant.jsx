@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useLocation, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Pencil, Plus, Save, LoaderCircle, CircleCheck, CircleAlert, BookOpen,
 } from 'lucide-react';
@@ -15,12 +15,10 @@ function formaterDate(valeur) {
 // Date du jour au format AAAA-MM-JJ (heure locale)
 const aujourdhui = () => new Date().toLocaleDateString('en-CA');
 
-// ===== Formulaire d'inscription (utilisé seulement dans cette page) =====
 const CHAMPS_A_CHOISIR = [
   'code_annee_universitaire', 'code_niveau', 'code_parcour', 'code_groupe', 'code_statut_inscription',
 ];
 
-// Une liste déroulante obligatoire, avec son message d'erreur
 function ChoixObligatoire({ nom, libelle, valeur, erreur, surChangement, children }) {
   return (
     <div className={'champ-formulaire' + (erreur ? ' invalide' : '')}>
@@ -35,7 +33,7 @@ function ChoixObligatoire({ nom, libelle, valeur, erreur, surChangement, childre
 }
 
 function FormulaireInscription({ numMatricule, surAjout, surAnnulation }) {
-  const [references, setReferences] = useState(null); // listes de choix
+  const [references, setReferences] = useState(null);
   const [valeurs, setValeurs] = useState(() => ({
     code_annee_universitaire: '',
     code_niveau: '',
@@ -48,7 +46,6 @@ function FormulaireInscription({ numMatricule, surAjout, surAnnulation }) {
   const [erreurGenerale, setErreurGenerale] = useState('');
   const [enCours, setEnCours] = useState(false);
 
-  // Charge les listes de choix au premier affichage
   useEffect(() => {
     let annule = false;
     listerReferences()
@@ -63,7 +60,6 @@ function FormulaireInscription({ numMatricule, surAjout, surAnnulation }) {
     };
   }, []);
 
-  // Contrôles : chaque liste doit avoir une valeur, la date ne peut pas être dans le futur
   const erreurs = {};
   for (const nom of CHAMPS_A_CHOISIR) {
     if (!valeurs[nom]) erreurs[nom] = 'Choisissez une valeur dans la liste.';
@@ -101,11 +97,9 @@ function FormulaireInscription({ numMatricule, surAjout, surAnnulation }) {
       : <p>Chargement des listes…</p>;
   }
 
-  // Les listes de base doivent exister pour pouvoir inscrire
   const listesIncompletes = ['annees', 'niveaux', 'parcours', 'groupes', 'statuts_inscription']
     .some((liste) => references[liste].length === 0);
 
-  // Les parcours sont regroupés par mention dans la liste déroulante
   const parcoursParMention = references.parcours.reduce((groupes, parcours) => {
     const mention = parcours.mention?.libelle_mention ?? 'Autres';
     (groupes[mention] ||= []).push(parcours);
@@ -117,10 +111,7 @@ function FormulaireInscription({ numMatricule, surAjout, surAnnulation }) {
       {listesIncompletes && (
         <div className="message-erreur" role="alert">
           <CircleAlert size={20} aria-hidden="true" />
-          <span>
-            Il manque des données de base (année, niveau, parcours, groupe ou statut).
-            Ajoutez-les dans la base avant d'inscrire un étudiant.
-          </span>
+          <span>Il manque des données de base (année, niveau, parcours, groupe ou statut).</span>
         </div>
       )}
       {erreurGenerale && (
@@ -179,9 +170,7 @@ function FormulaireInscription({ numMatricule, surAjout, surAnnulation }) {
       <div className="actions-formulaire">
         <button type="button" className="bouton bouton-secondaire" onClick={surAnnulation}>Annuler</button>
         <button className="bouton" disabled={enCours || listesIncompletes}>
-          {enCours
-            ? <LoaderCircle size={18} className="tourner" aria-hidden="true" />
-            : <Save size={18} aria-hidden="true" />}
+          {enCours ? <LoaderCircle size={18} className="tourner" aria-hidden="true" /> : <Save size={18} aria-hidden="true" />}
           Enregistrer l'inscription
         </button>
       </div>
@@ -189,18 +178,16 @@ function FormulaireInscription({ numMatricule, surAjout, surAnnulation }) {
   );
 }
 
-// ===== Page : fiche d'un étudiant =====
 export default function PageFicheEtudiant() {
   const { numMatricule } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
   const [etudiant, setEtudiant] = useState(null);
   const [erreur, setErreur] = useState('');
-  // Message de succès éventuel, transmis par la page de création ou de modification
   const [succes, setSucces] = useState(location.state?.message ?? '');
   const [inscriptionOuverte, setInscriptionOuverte] = useState(false);
-  const [rechargement, setRechargement] = useState(0); // augmente pour recharger la fiche
+  const [rechargement, setRechargement] = useState(0);
 
-  // Charge la fiche, et la recharge après chaque inscription
   useEffect(() => {
     let annule = false;
     obtenirEtudiant(numMatricule)
@@ -220,7 +207,7 @@ export default function PageFicheEtudiant() {
 
   function apresInscription() {
     setInscriptionOuverte(false);
-    setSucces('L\'inscription a été enregistrée.');
+    setSucces("L'inscription a été enregistrée.");
     setRechargement((n) => n + 1);
   }
 
@@ -245,9 +232,12 @@ export default function PageFicheEtudiant() {
           <h1>{etudiant.prenom} {etudiant.nom}</h1>
           <p className="sous-titre">Matricule {etudiant.num_matricule}</p>
         </div>
-        <Link to={`/etudiants/${encodeURIComponent(etudiant.num_matricule)}/modifier`} className="bouton bouton-secondaire">
+        <button 
+          onClick={() => navigate(`/etudiants/${encodeURIComponent(etudiant.num_matricule)}/modifier`)} 
+          className="bouton bouton-secondaire"
+        >
           <Pencil size={16} aria-hidden="true" /> Modifier
-        </Link>
+        </button>
       </header>
 
       {succes && (
@@ -323,4 +313,3 @@ export default function PageFicheEtudiant() {
     </div>
   );
 }
-

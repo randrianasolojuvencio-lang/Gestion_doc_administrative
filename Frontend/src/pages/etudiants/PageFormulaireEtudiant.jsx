@@ -1,324 +1,272 @@
 import { useEffect, useState } from 'react';
-import { Link, useLocation, useParams } from 'react-router-dom';
-import {
-  ArrowLeft, Pencil, Plus, Save, LoaderCircle, CircleCheck, CircleAlert, BookOpen,
-} from 'lucide-react';
-import EtatVide from '../../composants/EtatVide';
-import { obtenirEtudiant, listerReferences, creerInscription } from '../../services/serviceApi';
-import './PageFicheEtudiant.css';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft, Save, LoaderCircle, CircleAlert } from 'lucide-react';
+import { obtenirEtudiant, creerEtudiant, modifierEtudiant } from '../../services/serviceApi';
+import './PageFormulaireEtudiant.css';
 
-// Affiche une date AAAA-MM-JJ sous la forme JJ/MM/AAAA
-function formaterDate(valeur) {
-  return valeur ? valeur.split('-').reverse().join('/') : '—';
-}
+// ===== Champs du formulaire, regroupés par section =====
+const SECTIONS = [
+  {
+    titre: 'Identité',
+    champs: [
+      { nom: 'num_matricule', libelle: 'Matricule', requis: true, longueurMax: 8 },
+      { nom: 'nom', libelle: 'Nom', requis: true, longueurMax: 50 },
+      { nom: 'prenom', libelle: 'Prénom', longueurMax: 50 },
+      { nom: 'date_naissance', libelle: 'Date de naissance', type: 'date' },
+      { nom: 'lieu_naissance', libelle: 'Lieu de naissance', longueurMax: 50 },
+      { nom: 'cin', libelle: 'CIN (12 chiffres)', longueurMax: 12 },
+    ],
+  },
+  {
+    titre: 'Coordonnées',
+    champs: [
+      { nom: 'adresse', libelle: 'Adresse', longueurMax: 100 },
+      { nom: 'email', libelle: 'E-mail', type: 'email', longueurMax: 50 },
+      { nom: 'telephone', libelle: 'Téléphone', type: 'tel', longueurMax: 20 },
+    ],
+  },
+  {
+    titre: 'Parents',
+    champs: [
+      { nom: 'nom_pere', libelle: 'Nom du père', longueurMax: 50 },
+      { nom: 'prenom_pere', libelle: 'Prénom du père', longueurMax: 50 },
+      { nom: 'nom_mere', libelle: 'Nom de la mère', longueurMax: 50 },
+      { nom: 'prenom_mere', libelle: 'Prénom de la mère', longueurMax: 50 },
+    ],
+  },
+];
+
+// Valeurs de départ : un texte vide pour chaque champ
+const VALEURS_VIDES = Object.fromEntries(
+  SECTIONS.flatMap((section) => section.champs.map((champ) => [champ.nom, '']))
+);
+
+// ===== Contrôles des champs =====
+const REGLE_NOM = /^[\p{L}][\p{L} '’-]*$/u;            // lettres, espaces, apostrophes, tirets
+const REGLE_LIEU = /^[\p{L}\d][\p{L}\d .,'’-]*$/u;     // idem avec chiffres et ponctuation simple
 
 // Date du jour au format AAAA-MM-JJ (heure locale)
 const aujourdhui = () => new Date().toLocaleDateString('en-CA');
 
-// ===== Formulaire d'inscription (utilisé seulement dans cette page) =====
-const CHAMPS_A_CHOISIR = [
-  'code_annee_universitaire', 'code_niveau', 'code_parcour', 'code_groupe', 'code_statut_inscription',
-];
+// Contrôle d'un nom de personne, obligatoire ou facultatif
+function controlerNom(valeur, obligatoire) {
+  if (!valeur) return obligatoire ? 'Ce champ est obligatoire.' : '';
+  if (valeur.length > 50) return '50 caractères au plus.';
+  return REGLE_NOM.test(valeur) ? '' : 'Lettres, espaces, apostrophes et tirets uniquement.';
+}
 
-// Une liste déroulante obligatoire, avec son message d'erreur
-function ChoixObligatoire({ nom, libelle, valeur, erreur, surChangement, children }) {
+// Un contrôle par champ : renvoie le message d'erreur, ou '' si tout va bien
+const CONTROLES = {
+  num_matricule: (v) => {
+    if (!v) return 'Le matricule est obligatoire.';
+    return /^[A-Za-z0-9]{1,8}$/.test(v) ? '' : 'Lettres et chiffres uniquement, 8 caractères au plus.';
+  },
+  nom: (v) => controlerNom(v, true),
+  prenom: (v) => controlerNom(v, false),
+  date_naissance: (v) => {
+    if (!v) return '';
+    if (v > aujourdhui()) return 'La date ne peut pas être dans le futur.';
+    return v < '1940-01-01' ? 'Date de naissance invalide.' : '';
+  },
+  lieu_naissance: (v) => (!v || REGLE_LIEU.test(v) ? '' : 'Caractères non autorisés.'),
+  cin: (v) => (!v || /^\d{12}$/.test(v) ? '' : 'Le CIN contient exactement 12 chiffres.'),
+  adresse: (v) => (v.length <= 100 ? '' : '100 caractères au plus.'),
+  email: (v) => (!v || (v.length <= 50 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) ? '' : 'Adresse e-mail invalide.'),
+  telephone: (v) => (!v || /^\+?[0-9 ]{9,20}$/.test(v) ? '' : 'Numéro invalide : chiffres et espaces, 9 à 20 caractères.'),
+  nom_pere: (v) => controlerNom(v, false),
+  prenom_pere: (v) => controlerNom(v, false),
+  nom_mere: (v) => controlerNom(v, false),
+  prenom_mere: (v) => controlerNom(v, false),
+};
+
+// Transforme les valeurs du serveur (null) en textes vides pour les champs
+function versTextes(etudiant) {
+  return Object.fromEntries(Object.keys(VALEURS_VIDES).map((nom) => [nom, etudiant[nom] ?? '']));
+}
+
+// Un champ de saisie avec son libellé et son message d'erreur
+function Champ({ champ, valeur, message, desactive, surChangement, surSortie }) {
+  const { nom, libelle, requis = false, longueurMax, type = 'text' } = champ;
   return (
-    <div className={'champ-formulaire' + (erreur ? ' invalide' : '')}>
-      <label htmlFor={`choix-${nom}`}>{libelle} *</label>
-      <select id={`choix-${nom}`} name={nom} value={valeur} onChange={surChangement} aria-invalid={Boolean(erreur)}>
-        <option value="">Choisir…</option>
-        {children}
-      </select>
-      {erreur && <p className="erreur-champ">{erreur}</p>}
+    <div className={'champ-formulaire' + (message ? ' invalide' : '')}>
+      <label htmlFor={`champ-${nom}`}>{libelle}{requis && ' *'}</label>
+      <input
+        id={`champ-${nom}`}
+        name={nom}
+        type={type}
+        value={valeur}
+        maxLength={longueurMax}
+        disabled={desactive}
+        onChange={surChangement}
+        onBlur={surSortie}
+        aria-invalid={Boolean(message)}
+        aria-describedby={message ? `erreur-${nom}` : undefined}
+      />
+      {message && <p className="erreur-champ" id={`erreur-${nom}`}>{message}</p>}
     </div>
   );
 }
 
-function FormulaireInscription({ numMatricule, surAjout, surAnnulation }) {
-  const [references, setReferences] = useState(null); // listes de choix
-  const [valeurs, setValeurs] = useState(() => ({
-    code_annee_universitaire: '',
-    code_niveau: '',
-    code_parcour: '',
-    code_groupe: '',
-    code_statut_inscription: '',
-    date_inscription: aujourdhui(),
-  }));
-  const [tentative, setTentative] = useState(false);
+// Page de création (/etudiants/nouveau) et de modification (/etudiants/:numMatricule/modifier)
+export default function PageFormulaireEtudiant() {
+  const { numMatricule } = useParams();
+  const modification = Boolean(numMatricule);
+  const navigate = useNavigate();
+
+  const [valeurs, setValeurs] = useState(VALEURS_VIDES);
+  const [chargement, setChargement] = useState(modification);
+  const [touches, setTouches] = useState({});          // champs que l'agent a déjà quittés
+  const [tentative, setTentative] = useState(false);   // vrai après un clic sur Enregistrer
+  const [erreursServeur, setErreursServeur] = useState({});
   const [erreurGenerale, setErreurGenerale] = useState('');
   const [enCours, setEnCours] = useState(false);
 
-  // Charge les listes de choix au premier affichage
+  const cheminRetour = modification ? `/etudiants/${encodeURIComponent(numMatricule)}` : '/etudiants';
+
+  // En modification, on charge l'étudiant pour remplir le formulaire
   useEffect(() => {
+    if (!modification) return undefined;
     let annule = false;
-    listerReferences()
-      .then((donnees) => {
-        if (!annule) setReferences(donnees);
+    obtenirEtudiant(numMatricule)
+      .then((etudiant) => {
+        if (!annule) {
+          setValeurs(versTextes(etudiant));
+          setChargement(false);
+        }
       })
       .catch((err) => {
-        if (!annule) setErreurGenerale(err.message);
+        if (!annule) {
+          setErreurGenerale(err.message);
+          setChargement(false);
+        }
       });
     return () => {
       annule = true;
     };
-  }, []);
+  }, [modification, numMatricule]);
 
-  // Contrôles : chaque liste doit avoir une valeur, la date ne peut pas être dans le futur
-  const erreurs = {};
-  for (const nom of CHAMPS_A_CHOISIR) {
-    if (!valeurs[nom]) erreurs[nom] = 'Choisissez une valeur dans la liste.';
-  }
-  if (valeurs.date_inscription > aujourdhui()) {
-    erreurs.date_inscription = 'La date ne peut pas être dans le futur.';
-  } else if (valeurs.date_inscription && valeurs.date_inscription < '2000-01-01') {
-    erreurs.date_inscription = 'Date invalide.';
-  }
-  const message = (nom) => (tentative ? erreurs[nom] : '');
+  // Erreur de contrôle de chaque champ (le matricule n'est pas contrôlé en modification)
+  const erreursChamps = Object.fromEntries(
+    Object.keys(VALEURS_VIDES).map((nom) => [
+      nom,
+      modification && nom === 'num_matricule' ? '' : CONTROLES[nom](valeurs[nom].trim()),
+    ])
+  );
+
+  // Message affiché sous un champ : contrôle local (après passage dans le champ), sinon erreur du serveur
+  const messageChamp = (nom) =>
+    ((touches[nom] || tentative) && erreursChamps[nom]) || erreursServeur[nom] || '';
 
   function modifierChamp(evenement) {
-    setValeurs({ ...valeurs, [evenement.target.name]: evenement.target.value });
+    const { name, value } = evenement.target;
+    setValeurs({ ...valeurs, [name]: value });
+    setErreursServeur({ ...erreursServeur, [name]: '' });
+  }
+
+  function quitterChamp(evenement) {
+    setTouches({ ...touches, [evenement.target.name]: true });
   }
 
   async function soumettre(evenement) {
     evenement.preventDefault();
     setTentative(true);
     setErreurGenerale('');
-    if (Object.keys(erreurs).length > 0) return;
+
+    if (Object.values(erreursChamps).some(Boolean)) {
+      setErreurGenerale('Corrigez les champs signalés en rouge.');
+      return;
+    }
+
+    // Nettoyage : espaces retirés, matricule en majuscules, e-mail en minuscules, champs vides = null
+    const donnees = Object.fromEntries(
+      Object.entries(valeurs).map(([nom, valeur]) => {
+        let texte = valeur.trim();
+        if (nom === 'num_matricule') texte = texte.toUpperCase();
+        if (nom === 'email') texte = texte.toLowerCase();
+        return [nom, texte === '' ? null : texte];
+      })
+    );
 
     setEnCours(true);
     try {
-      await creerInscription(numMatricule, valeurs);
-      surAjout();
+      if (modification) {
+        await modifierEtudiant(numMatricule, donnees);
+        navigate(cheminRetour, { state: { message: 'Les informations de l\'étudiant ont été enregistrées.' } });
+      } else {
+        const etudiant = await creerEtudiant(donnees);
+        navigate(`/etudiants/${encodeURIComponent(etudiant.num_matricule)}`, {
+          state: { message: 'L\'étudiant a été enregistré. Vous pouvez maintenant ajouter son inscription.' },
+        });
+      }
     } catch (err) {
+      // Les erreurs du serveur sont affichées sous les champs concernés
+      if (err.erreurs) {
+        setErreursServeur(
+          Object.fromEntries(Object.entries(err.erreurs).map(([nom, messages]) => [nom, messages[0]]))
+        );
+      }
       setErreurGenerale(err.message);
       setEnCours(false);
     }
   }
 
-  if (!references) {
-    return erreurGenerale
-      ? <div className="message-erreur" role="alert"><CircleAlert size={20} /><span>{erreurGenerale}</span></div>
-      : <p>Chargement des listes…</p>;
-  }
-
-  // Les listes de base doivent exister pour pouvoir inscrire
-  const listesIncompletes = ['annees', 'niveaux', 'parcours', 'groupes', 'statuts_inscription']
-    .some((liste) => references[liste].length === 0);
-
-  // Les parcours sont regroupés par mention dans la liste déroulante
-  const parcoursParMention = references.parcours.reduce((groupes, parcours) => {
-    const mention = parcours.mention?.libelle_mention ?? 'Autres';
-    (groupes[mention] ||= []).push(parcours);
-    return groupes;
-  }, {});
-
-  return (
-    <form onSubmit={soumettre} noValidate>
-      {listesIncompletes && (
-        <div className="message-erreur" role="alert">
-          <CircleAlert size={20} aria-hidden="true" />
-          <span>
-            Il manque des données de base (année, niveau, parcours, groupe ou statut).
-            Ajoutez-les dans la base avant d'inscrire un étudiant.
-          </span>
-        </div>
-      )}
-      {erreurGenerale && (
-        <div className="message-erreur" role="alert">
-          <CircleAlert size={20} aria-hidden="true" />
-          <span>{erreurGenerale}</span>
-        </div>
-      )}
-
-      <div className="grille-champs">
-        <ChoixObligatoire nom="code_annee_universitaire" libelle="Année universitaire" valeur={valeurs.code_annee_universitaire} erreur={message('code_annee_universitaire')} surChangement={modifierChamp}>
-          {references.annees.map((annee) => (
-            <option key={annee.code_annee_universitaire} value={annee.code_annee_universitaire}>
-              {annee.code_annee_universitaire}
-            </option>
-          ))}
-        </ChoixObligatoire>
-
-        <ChoixObligatoire nom="code_niveau" libelle="Niveau" valeur={valeurs.code_niveau} erreur={message('code_niveau')} surChangement={modifierChamp}>
-          {references.niveaux.map((niveau) => (
-            <option key={niveau.code_niveau} value={niveau.code_niveau}>{niveau.libelle_niveau}</option>
-          ))}
-        </ChoixObligatoire>
-
-        <ChoixObligatoire nom="code_parcour" libelle="Parcours" valeur={valeurs.code_parcour} erreur={message('code_parcour')} surChangement={modifierChamp}>
-          {Object.entries(parcoursParMention).map(([mention, parcoursDeLaMention]) => (
-            <optgroup key={mention} label={mention}>
-              {parcoursDeLaMention.map((parcours) => (
-                <option key={parcours.code_parcour} value={parcours.code_parcour}>{parcours.libelle_parcour}</option>
-              ))}
-            </optgroup>
-          ))}
-        </ChoixObligatoire>
-
-        <ChoixObligatoire nom="code_groupe" libelle="Groupe" valeur={valeurs.code_groupe} erreur={message('code_groupe')} surChangement={modifierChamp}>
-          {references.groupes.map((groupe) => (
-            <option key={groupe.code_groupe} value={groupe.code_groupe}>{groupe.libelle_groupe}</option>
-          ))}
-        </ChoixObligatoire>
-
-        <ChoixObligatoire nom="code_statut_inscription" libelle="Statut" valeur={valeurs.code_statut_inscription} erreur={message('code_statut_inscription')} surChangement={modifierChamp}>
-          {references.statuts_inscription.map((statut) => (
-            <option key={statut.code_statut_inscription} value={statut.code_statut_inscription}>
-              {statut.libelle_statut_inscription}
-            </option>
-          ))}
-        </ChoixObligatoire>
-
-        <div className={'champ-formulaire' + (message('date_inscription') ? ' invalide' : '')}>
-          <label htmlFor="date_inscription">Date d'inscription</label>
-          <input id="date_inscription" name="date_inscription" type="date" value={valeurs.date_inscription} onChange={modifierChamp} max={aujourdhui()} />
-          {message('date_inscription') && <p className="erreur-champ">{message('date_inscription')}</p>}
-        </div>
-      </div>
-
-      <div className="actions-formulaire">
-        <button type="button" className="bouton bouton-secondaire" onClick={surAnnulation}>Annuler</button>
-        <button className="bouton" disabled={enCours || listesIncompletes}>
-          {enCours
-            ? <LoaderCircle size={18} className="tourner" aria-hidden="true" />
-            : <Save size={18} aria-hidden="true" />}
-          Enregistrer l'inscription
-        </button>
-      </div>
-    </form>
-  );
-}
-
-// ===== Page : fiche d'un étudiant =====
-export default function PageFicheEtudiant() {
-  const { numMatricule } = useParams();
-  const location = useLocation();
-  const [etudiant, setEtudiant] = useState(null);
-  const [erreur, setErreur] = useState('');
-  // Message de succès éventuel, transmis par la page de création ou de modification
-  const [succes, setSucces] = useState(location.state?.message ?? '');
-  const [inscriptionOuverte, setInscriptionOuverte] = useState(false);
-  const [rechargement, setRechargement] = useState(0); // augmente pour recharger la fiche
-
-  // Charge la fiche, et la recharge après chaque inscription
-  useEffect(() => {
-    let annule = false;
-    obtenirEtudiant(numMatricule)
-      .then((donnees) => {
-        if (!annule) {
-          setEtudiant(donnees);
-          setErreur('');
-        }
-      })
-      .catch((err) => {
-        if (!annule) setErreur(err.message);
-      });
-    return () => {
-      annule = true;
-    };
-  }, [numMatricule, rechargement]);
-
-  function apresInscription() {
-    setInscriptionOuverte(false);
-    setSucces('L\'inscription a été enregistrée.');
-    setRechargement((n) => n + 1);
-  }
-
-  if (erreur && !etudiant) {
-    return (
-      <div className="page-contenu">
-        <Link to="/etudiants" className="lien-retour"><ArrowLeft size={16} aria-hidden="true" /> Retour à la liste</Link>
-        <div className="message-erreur" role="alert"><CircleAlert size={20} /><span>{erreur}</span></div>
-      </div>
-    );
-  }
-
-  if (!etudiant) return <p className="chargement">Chargement…</p>;
+  if (chargement) return <p className="chargement">Chargement…</p>;
 
   return (
     <div className="page-contenu">
       <header className="en-tete-page">
         <div>
-          <Link to="/etudiants" className="lien-retour">
-            <ArrowLeft size={16} aria-hidden="true" /> Retour à la liste
+          <Link to={cheminRetour} className="lien-retour">
+            <ArrowLeft size={16} aria-hidden="true" /> {modification ? 'Retour à la fiche' : 'Retour à la liste'}
           </Link>
-          <h1>{etudiant.prenom} {etudiant.nom}</h1>
-          <p className="sous-titre">Matricule {etudiant.num_matricule}</p>
-        </div>
-        <Link to={`/etudiants/${encodeURIComponent(etudiant.num_matricule)}/modifier`} className="bouton bouton-secondaire">
-          <Pencil size={16} aria-hidden="true" /> Modifier
-        </Link>
-      </header>
-
-      {succes && (
-        <div className="message-succes" role="status">
-          <CircleCheck size={20} aria-hidden="true" />
-          <span>{succes}</span>
-        </div>
-      )}
-
-      <section className="panneau">
-        <h2>Informations</h2>
-        <dl className="liste-infos">
-          <div><dt>Date de naissance</dt><dd>{formaterDate(etudiant.date_naissance)}</dd></div>
-          <div><dt>Lieu de naissance</dt><dd>{etudiant.lieu_naissance ?? '—'}</dd></div>
-          <div><dt>CIN</dt><dd>{etudiant.cin ?? '—'}</dd></div>
-          <div><dt>E-mail</dt><dd>{etudiant.email ?? '—'}</dd></div>
-          <div><dt>Téléphone</dt><dd>{etudiant.telephone ?? '—'}</dd></div>
-          <div><dt>Adresse</dt><dd>{etudiant.adresse ?? '—'}</dd></div>
-          <div><dt>Père</dt><dd>{[etudiant.prenom_pere, etudiant.nom_pere].filter(Boolean).join(' ') || '—'}</dd></div>
-          <div><dt>Mère</dt><dd>{[etudiant.prenom_mere, etudiant.nom_mere].filter(Boolean).join(' ') || '—'}</dd></div>
-        </dl>
-      </section>
-
-      <section className="panneau">
-        <div className="en-tete-panneau">
-          <h2>Inscriptions</h2>
-          {!inscriptionOuverte && (
-            <button className="bouton bouton-petit" onClick={() => { setInscriptionOuverte(true); setSucces(''); }}>
-              <Plus size={16} aria-hidden="true" /> Ajouter une inscription
-            </button>
+          <h1>{modification ? 'Modifier l\'étudiant' : 'Nouvel étudiant'}</h1>
+          {!modification && (
+            <p className="sous-titre">Après l'enregistrement, vous pourrez ajouter son inscription.</p>
           )}
         </div>
+      </header>
 
-        {inscriptionOuverte && (
-          <div className="bloc-inscription">
-            <FormulaireInscription
-              numMatricule={etudiant.num_matricule}
-              surAjout={apresInscription}
-              surAnnulation={() => setInscriptionOuverte(false)}
-            />
+      <section className="panneau">
+        {/* noValidate : les contrôles sont faits par la page, avec ses propres messages */}
+        <form onSubmit={soumettre} noValidate className="formulaire-etudiant">
+          {erreurGenerale && (
+            <div className="message-erreur" role="alert">
+              <CircleAlert size={20} aria-hidden="true" />
+              <span>{erreurGenerale}</span>
+            </div>
+          )}
+
+          {SECTIONS.map((section) => (
+            <fieldset key={section.titre}>
+              <legend>{section.titre}</legend>
+              <div className="grille-champs">
+                {section.champs.map((champ) => (
+                  <Champ
+                    key={champ.nom}
+                    champ={champ}
+                    valeur={valeurs[champ.nom]}
+                    message={messageChamp(champ.nom)}
+                    desactive={modification && champ.nom === 'num_matricule'}
+                    surChangement={modifierChamp}
+                    surSortie={quitterChamp}
+                  />
+                ))}
+              </div>
+            </fieldset>
+          ))}
+
+          <div className="actions-formulaire">
+            <button type="button" className="bouton bouton-secondaire" onClick={() => navigate(cheminRetour)}>
+              Annuler
+            </button>
+            <button className="bouton" disabled={enCours}>
+              {enCours
+                ? <LoaderCircle size={18} className="tourner" aria-hidden="true" />
+                : <Save size={18} aria-hidden="true" />}
+              {modification ? 'Enregistrer les modifications' : 'Enregistrer l\'étudiant'}
+            </button>
           </div>
-        )}
-
-        {etudiant.inscriptions.length === 0 ? (
-          <EtatVide
-            Icone={BookOpen}
-            titre="Aucune inscription"
-            texte="Utilisez « Ajouter une inscription » pour inscrire cet étudiant à une année universitaire."
-          />
-        ) : (
-          <table className="tableau">
-            <thead>
-              <tr><th>Année</th><th>Niveau</th><th>Parcours</th><th>Groupe</th><th>Statut</th><th>Date</th></tr>
-            </thead>
-            <tbody>
-              {etudiant.inscriptions.map((inscription) => (
-                <tr key={inscription.code_inscription}>
-                  <td>{inscription.code_annee_universitaire}</td>
-                  <td>{inscription.niveau?.libelle_niveau}</td>
-                  <td>
-                    {inscription.parcours?.libelle_parcour}
-                    <span className="mention">{inscription.parcours?.mention?.libelle_mention}</span>
-                  </td>
-                  <td>{inscription.groupe?.libelle_groupe}</td>
-                  <td>{inscription.statut_inscription?.libelle_statut_inscription}</td>
-                  <td>{formaterDate(inscription.date_inscription)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+        </form>
       </section>
     </div>
   );

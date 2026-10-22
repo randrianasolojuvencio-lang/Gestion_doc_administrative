@@ -55,6 +55,21 @@ button { font: inherit; }
 .carte button:hover { background: #fff; color: var(--couleur-bouton); }
 .erreur { margin-top: .8rem; color: var(--couleur-erreur); }
 
+/* ===== Formulaires ===== */
+.grille-champs { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: .9rem; }
+.champ-formulaire label { display: block; margin-bottom: .3rem; font-size: .85rem; font-weight: 600; }
+.champ-formulaire input, .champ-formulaire select { width: 100%; padding: .6rem; border: 1px solid var(--couleur-bordure); border-radius: 8px; background: #fff; color: var(--couleur-texte); font-size: .95rem; }
+.champ-formulaire input:disabled { background: var(--couleur-fond); color: var(--couleur-secondaire); }
+.actions-formulaire { display: flex; justify-content: flex-end; gap: .7rem; margin-top: 1rem; }
+
+/* Lien de retour en haut d'une page */
+.lien-retour { display: inline-flex; align-items: center; gap: .35rem; margin-bottom: .6rem; color: var(--couleur-accent); font-size: .88rem; font-weight: 600; text-decoration: none; }
+.lien-retour:hover { text-decoration: underline; }
+
+/* Rotation de l'icône de chargement */
+.tourner { animation: tourner 1s linear infinite; }
+@keyframes tourner { to { transform: rotate(360deg); } }
+
 /* ===== Contrôle des champs ===== */
 .champ-formulaire.invalide input, .champ-formulaire.invalide select { border-color: var(--couleur-erreur); background: var(--couleur-erreur-fond); }
 .erreur-champ { margin: .25rem 0 0; color: var(--couleur-erreur); font-size: .8rem; }

@@ -1,2 +1,9 @@
-.formulaire-etudiant fieldset { margin: 0 0 1.2rem; padding: 1rem 1.1rem 1.2rem; border: 1px solid var(--couleur-bordure); border-radius: 10px; }
-.formulaire-etudiant legend { padding: 0 .4rem; color: var(--couleur-accent); font-weight: 600; }
+.recherche { position: relative; margin-bottom: 1.2rem; }
+.recherche svg { position: absolute; left: .85rem; top: 50%; transform: translateY(-50%); color: var(--couleur-secondaire); pointer-events: none; }
+.recherche input { width: 100%; padding: .7rem .8rem .7rem 2.6rem; border: 1px solid var(--couleur-bordure); border-radius: 8px; background: #fff; font-size: .95rem; }
+
+.lien-nom { color: var(--couleur-accent); font-weight: 600; text-decoration: none; }
+.lien-nom:hover { text-decoration: underline; }
+.non-inscrit { color: var(--couleur-secondaire); font-style: italic; }
+
+.pagination { display: flex; justify-content: flex-end; align-items: center; gap: .8rem; margin-top: 1rem; color: var(--couleur-secondaire); font-size: .88rem; }
