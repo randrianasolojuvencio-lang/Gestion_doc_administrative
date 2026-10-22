@@ -9,12 +9,12 @@ const SECTIONS = [
   {
     titre: 'Identité',
     champs: [
-      { nom: 'num_matricule', libelle: 'Matricule', requis: true, longueurMax: 8 },
+      { nom: 'num_matricule', libelle: 'Matricule', requis: true, longueurMax: 10 },
       { nom: 'nom', libelle: 'Nom', requis: true, longueurMax: 50 },
       { nom: 'prenom', libelle: 'Prénom', longueurMax: 50 },
       { nom: 'date_naissance', libelle: 'Date de naissance', type: 'date' },
       { nom: 'lieu_naissance', libelle: 'Lieu de naissance', longueurMax: 50 },
-      { nom: 'cin', libelle: 'CIN (12 chiffres)', longueurMax: 12 },
+      { nom: 'cin', libelle: 'CIN (12 chiffres)', longueurMax: 12, modeSaisie: 'numeric' },
     ],
   },
   {
@@ -22,7 +22,7 @@ const SECTIONS = [
     champs: [
       { nom: 'adresse', libelle: 'Adresse', longueurMax: 100 },
       { nom: 'email', libelle: 'E-mail', type: 'email', longueurMax: 50 },
-      { nom: 'telephone', libelle: 'Téléphone', type: 'tel', longueurMax: 20 },
+      { nom: 'telephone', libelle: 'Téléphone(10 chiffres)', type: 'tel', longueurMax: 10, modeSaisie: 'numeric' },
     ],
   },
   {
@@ -42,7 +42,7 @@ const VALEURS_VIDES = Object.fromEntries(
 );
 
 // ===== Contrôles des champs =====
-const REGLE_NOM = /^[\p{L}][\p{L} '’-]*$/u;            // lettres, espaces, apostrophes, tirets
+const REGLE_NOM = /^[\p{L} \-'']+$/u; // Uniquement les lettre, espace, tirets, apostrophes           
 const REGLE_LIEU = /^[\p{L}\d][\p{L}\d .,'’-]*$/u;     // idem avec chiffres et ponctuation simple
 
 // Date du jour au format AAAA-MM-JJ (heure locale)
@@ -52,14 +52,14 @@ const aujourdhui = () => new Date().toLocaleDateString('en-CA');
 function controlerNom(valeur, obligatoire) {
   if (!valeur) return obligatoire ? 'Ce champ est obligatoire.' : '';
   if (valeur.length > 50) return '50 caractères au plus.';
-  return REGLE_NOM.test(valeur) ? '' : 'Lettres, espaces, apostrophes et tirets uniquement.';
+  return REGLE_NOM.test(valeur) ? '' : 'Lettres et espaces uniquement.';
 }
 
 // Un contrôle par champ : renvoie le message d'erreur, ou '' si tout va bien
 const CONTROLES = {
   num_matricule: (v) => {
     if (!v) return 'Le matricule est obligatoire.';
-    return /^[A-Za-z0-9]{1,8}$/.test(v) ? '' : 'Lettres et chiffres uniquement, 8 caractères au plus.';
+    return /^[A-Za-z0-9 -]{1,10}$/.test(v) ? '' : 'Lettres et chiffres uniquement, 10 caractères au plus.';
   },
   nom: (v) => controlerNom(v, true),
   prenom: (v) => controlerNom(v, false),
@@ -72,7 +72,7 @@ const CONTROLES = {
   cin: (v) => (!v || /^\d{12}$/.test(v) ? '' : 'Le CIN contient exactement 12 chiffres.'),
   adresse: (v) => (v.length <= 100 ? '' : '100 caractères au plus.'),
   email: (v) => (!v || (v.length <= 50 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) ? '' : 'Adresse e-mail invalide.'),
-  telephone: (v) => (!v || /^\+?[0-9 ]{9,20}$/.test(v) ? '' : 'Numéro invalide : chiffres et espaces, 9 à 20 caractères.'),
+  telephone: (v) => (!v || /^\d{10}$/.test(v) ? '' : 'Le téléphone contient exactement 10 chiffres.'),
   nom_pere: (v) => controlerNom(v, false),
   prenom_pere: (v) => controlerNom(v, false),
   nom_mere: (v) => controlerNom(v, false),
@@ -159,7 +159,24 @@ export default function PageFormulaireEtudiant() {
 
   function modifierChamp(evenement) {
     const { name, value } = evenement.target;
-    setValeurs({ ...valeurs, [name]: value });
+
+    let valeurFinale = value;
+    
+    // Pour les champs noms, on force les majuscules et on ne garde que les lettres et et espaces
+    if(['nom', 'nom_pere', 'nom_mere'].includes(name)){
+      valeurFinale = valeurFinale.toUpperCase().replace(/[^\p{L} \-'']/gu, '');
+    }
+    // Pour les prenoms, on retires les chiffres
+    else if(['prenom', 'prenom_pere', 'prenom_mere'].includes(name)){
+      valeurFinale = valeurFinale.replace(/[^\p{L} \-'']/gu, '');
+    }
+    // Pour le CIN, on ne garde que les chiffres
+    else if (name === 'cin' || name === 'telephone'){
+      valeurFinale = valeurFinale.replace(/\D/g, '');
+    }
+
+      
+    setValeurs({ ...valeurs, [name]: valeurFinale });
     setErreursServeur({ ...erreursServeur, [name]: '' });
   }
 
