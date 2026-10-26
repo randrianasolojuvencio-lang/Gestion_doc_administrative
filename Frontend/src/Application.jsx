@@ -10,6 +10,7 @@ import PageAgents from './pages/PageAgents';
 import PageEtudiants from './pages/etudiants/PageEtudiants';
 import PageFormulaireEtudiant from './pages/etudiants/PageFormulaireEtudiant';
 import PageFicheEtudiant from './pages/etudiants/PageFicheEtudiant';
+import PageDonneesDeBase from './pages/donneesDeBase/PageDonneesDeBase';
 
 // Composant principal : choisit ce qu'on affiche selon l'état de l'agent
 export default function Application() {
@@ -53,6 +54,9 @@ export default function Application() {
           <Route path="/etudiants/nouveau" element={<PageFormulaireEtudiant key="creation" />} />
           <Route path="/etudiants/:numMatricule/modifier" element={<PageFormulaireEtudiant key="modification" />} />
           <Route path="/etudiants/:numMatricule" element={<PageFicheEtudiant />} />
+
+          {/* Données de base : la rubrique est facultative dans l'adresse */}
+          <Route path="/donnees-de-base/:rubrique?" element={<PageDonneesDeBase />} />
         </Route>
         {/* Toute autre adresse ramène au tableau de bord */}
         <Route path="*" element={<Navigate to="/" replace />} />

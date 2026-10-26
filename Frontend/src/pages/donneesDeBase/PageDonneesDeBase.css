@@ -1,0 +1,14 @@
+/* Onglets des rubriques */
+.onglets { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: 1.2rem; }
+.onglet { display: inline-flex; align-items: center; gap: .45rem; padding: .5rem .9rem; border: 1px solid var(--couleur-bordure); border-radius: 999px; background: #fff; color: var(--couleur-accent); font-size: .9rem; font-weight: 600; text-decoration: none; transition: background-color .15s, color .15s; }
+.onglet:hover { background: var(--couleur-accent-clair); }
+.onglet.actif { background: var(--couleur-accent); border-color: var(--couleur-accent); color: #fff; }
+
+.texte-discret { color: var(--couleur-secondaire); font-size: .88rem; }
+.en-tete-panneau .sous-titre { margin: .1rem 0 0; }
+
+.formulaire-donnee { padding: 1.1rem; margin-bottom: 1.2rem; background: var(--couleur-fond); border: 1px solid var(--couleur-bordure); border-radius: 10px; }
+.formulaire-donnee h3 { margin-bottom: .8rem; font-size: 1rem; }
+.aide-champ { margin: .25rem 0 0; color: var(--couleur-secondaire); font-size: .8rem; }
+
+.en-tete-panneau { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }

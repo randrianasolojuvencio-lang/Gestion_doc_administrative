@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import {
-  LayoutDashboard, FileText, GraduationCap, Users, LogOut, UserRound, ChevronUp,
+  LayoutDashboard, FileText, GraduationCap, Users, LogOut, UserRound, ChevronUp, Database,
 } from 'lucide-react';
 import './MiseEnPage.css';
 
@@ -11,6 +11,7 @@ const ELEMENTS_MENU = [
   { chemin: '/', libelle: 'Tableau de bord', Icone: LayoutDashboard },
   { chemin: '/demandes', libelle: 'Demandes', Icone: FileText },
   { chemin: '/etudiants', libelle: 'Étudiants', Icone: GraduationCap },
+  { chemin: '/donnees-de-base', libelle: 'Données de base', Icone: Database },
 ];
 
 // Cadre commun à toutes les pages connectées : menu à gauche, page à droite

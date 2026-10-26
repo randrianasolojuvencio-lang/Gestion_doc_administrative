@@ -1,0 +1,19 @@
+/* En-tête de colonne avec liste de choix (filtre d'un tableau) */
+.entete-filtre { position: relative; display: inline-block; }
+
+.entete-filtre-bouton { display: inline-flex; align-items: center; gap: .35rem; padding: .25rem .5rem; margin: -.25rem -.5rem; border: 1px solid transparent; border-radius: 6px; background: transparent; color: inherit; font: inherit; cursor: pointer; transition: background-color .15s, color .15s; }
+.entete-filtre-bouton:hover { background: var(--couleur-accent); color: #fff; }
+.entete-filtre-bouton.actif { background: var(--couleur-accent-clair); border-color: var(--couleur-accent); color: var(--couleur-accent); }
+.entete-filtre-bouton.actif:hover { background: var(--couleur-accent); color: #fff; }
+
+/* Pastille qui rappelle le choix actuel */
+.entete-filtre-valeur { padding: .05rem .5rem; border-radius: 999px; background: var(--couleur-accent); color: #fff; font-size: .78rem; font-weight: 600; }
+.entete-filtre-bouton:hover .entete-filtre-valeur { background: #fff; color: var(--couleur-accent); }
+
+/* Liste des choix */
+.entete-filtre-liste { position: absolute; top: calc(100% + .5rem); left: -.5rem; z-index: 20; min-width: 210px; max-height: 280px; overflow-y: auto; margin: 0; padding: .35rem; list-style: none; background: #fff; border: 1px solid var(--couleur-bordure); border-radius: 10px; box-shadow: 0 6px 20px rgba(31, 45, 68, .18); font-weight: 400; }
+.entete-filtre-option { display: flex; align-items: center; justify-content: space-between; gap: .6rem; width: 100%; padding: .5rem .65rem; border: 0; border-radius: 6px; background: transparent; color: var(--couleur-texte); font-size: .9rem; text-align: left; cursor: pointer; transition: background-color .15s, color .15s; }
+.entete-filtre-option:hover { background: var(--couleur-accent); color: #fff; }
+.entete-filtre-option.choisie { color: var(--couleur-accent); font-weight: 600; }
+.entete-filtre-option.choisie:hover { color: #fff; }
+.entete-filtre-vide { padding: .5rem .65rem; color: var(--couleur-secondaire); font-size: .85rem; }

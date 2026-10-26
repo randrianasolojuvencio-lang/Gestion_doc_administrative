@@ -111,7 +111,10 @@ function FormulaireInscription({ numMatricule, surAjout, surAnnulation }) {
       {listesIncompletes && (
         <div className="message-erreur" role="alert">
           <CircleAlert size={20} aria-hidden="true" />
-          <span>Il manque des données de base (année, niveau, parcours, groupe ou statut).</span>
+          <span>
+            Il manque des données de base (année, niveau, parcours, groupe ou statut).{' '}
+            <Link to="/donnees-de-base" className="lien-nom">Les ajouter dans « Données de base »</Link>
+          </span>
         </div>
       )}
       {erreurGenerale && (
@@ -185,7 +188,7 @@ export default function PageFicheEtudiant() {
   const [etudiant, setEtudiant] = useState(null);
   const [erreur, setErreur] = useState('');
   const [succes, setSucces] = useState(location.state?.message ?? '');
-  const [inscriptionOuverte, setInscriptionOuverte] = useState(false);
+  const [inscriptionOuverte, setInscriptionOuverte] = useState(location.state?.ouvrirInscription ?? false);
   const [rechargement, setRechargement] = useState(0);
 
   useEffect(() => {

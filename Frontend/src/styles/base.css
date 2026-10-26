@@ -16,8 +16,7 @@ button { font: inherit; }
 
 .chargement { margin-top: 20vh; text-align: center; color: var(--couleur-secondaire); }
 
-/* ===== Boutons =====
-   Au survol, la couleur du fond et celle du texte s'échangent. */
+/* Boutons, Au survol, la couleur du fond et celle du texte s'échangent. */
 .bouton { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; padding: .6rem 1.1rem; border: 2px solid var(--couleur-bouton); border-radius: 8px; background: #fff; color: var(--couleur-bouton); font-size: .95rem; font-weight: 600; text-decoration: none; cursor: pointer; transition: background-color .15s, color .15s; }
 .bouton:hover:not(:disabled) { background: var(--couleur-bouton); color: #fff; }
 .bouton:disabled { opacity: .5; cursor: not-allowed; }
@@ -28,7 +27,7 @@ button { font: inherit; }
 
 .bouton-petit { padding: .3rem .65rem; border-width: 1.5px; font-size: .85rem; }
 
-/* ===== Mise en page des pages ===== */
+/* Mise en page des pages */
 .page-contenu { max-width: 1100px; padding: 2rem; }
 .en-tete-page { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
 .en-tete-page h1 { font-size: 1.6rem; }
@@ -36,26 +35,26 @@ button { font: inherit; }
 .panneau { padding: 1.4rem; margin-bottom: 1.5rem; background: var(--couleur-surface); border: 1px solid var(--couleur-bordure); border-radius: 12px; box-shadow: 0 1px 3px rgba(31, 45, 68, .05); }
 .panneau h2 { margin-bottom: 1rem; font-size: 1.05rem; }
 
-/* ===== Messages ===== */
+/* Messages */
 .message-succes, .message-erreur { display: flex; gap: .7rem; align-items: flex-start; padding: .9rem 1rem; margin-bottom: 1.2rem; border-radius: 8px; font-size: .92rem; }
 .message-succes { background: var(--couleur-succes-fond); color: var(--couleur-succes-texte); }
 .message-erreur { background: var(--couleur-erreur-fond); color: var(--couleur-erreur); }
 
-/* ===== Tableaux ===== */
+/* Tableaux */
 .tableau { width: 100%; border-collapse: collapse; font-size: .9rem; }
 .tableau th { text-align: left; padding: .6rem .7rem; color: var(--couleur-secondaire); font-weight: 600; border-bottom: 1px solid var(--couleur-bordure); }
 .tableau td { padding: .7rem; border-bottom: 1px solid #edf1f7; }
 .tableau tbody tr:hover td { background: var(--couleur-accent-clair); }
 
-/* ===== Carte centrée (changement de mot de passe) ===== */
+/* Carte centrée (changement de mot de passe) */
 .carte { max-width: 400px; margin: 10vh auto; padding: 2rem; background: var(--couleur-surface); border: 1px solid var(--couleur-bordure); border-radius: 12px; box-shadow: 0 4px 20px rgba(31, 45, 68, .08); }
 .carte label { display: block; margin: .9rem 0 .3rem; font-size: .9rem; font-weight: 600; }
 .carte input { width: 100%; padding: .65rem; border: 1px solid var(--couleur-bordure); border-radius: 8px; font-size: 1rem; }
-.carte button { width: 100%; margin-top: 1.3rem; padding: .7rem; border: 2px solid var(--couleur-bouton); border-radius: 8px; background: var(--couleur-bouton); color: #fff; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background-color .15s, color .15s; }
-.carte button:hover { background: #fff; color: var(--couleur-bouton); }
+.carte button { width: 100%; margin-top: 1.3rem; padding: .7rem; border: 2px solid var(--couleur-bouton); border-radius: 8px; background: #fff; color: var(--couleur-bouton); font-size: 1rem; font-weight: 600; cursor: pointer; transition: background-color .15s, color .15s; }
+.carte button:hover { background: var(--couleur-bouton); color: #fff; }
 .erreur { margin-top: .8rem; color: var(--couleur-erreur); }
 
-/* ===== Formulaires ===== */
+/*  Formulaires  */
 .grille-champs { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: .9rem; }
 .champ-formulaire label { display: block; margin-bottom: .3rem; font-size: .85rem; font-weight: 600; }
 .champ-formulaire input, .champ-formulaire select { width: 100%; padding: .6rem; border: 1px solid var(--couleur-bordure); border-radius: 8px; background: #fff; color: var(--couleur-texte); font-size: .95rem; }
@@ -73,3 +72,10 @@ button { font: inherit; }
 /* ===== Contrôle des champs ===== */
 .champ-formulaire.invalide input, .champ-formulaire.invalide select { border-color: var(--couleur-erreur); background: var(--couleur-erreur-fond); }
 .erreur-champ { margin: .25rem 0 0; color: var(--couleur-erreur); font-size: .8rem; }
+
+/* Bouton de suppression : rouge */
+.bouton-danger { background: #fff; color: var(--couleur-erreur); border-color: var(--couleur-erreur); }
+.bouton-danger:hover:not(:disabled) { background: var(--couleur-erreur); color: #fff; }
+
+/* Boutons d'action alignés dans une cellule de tableau */
+.actions-ligne { display: flex; flex-wrap: wrap; gap: .4rem; }

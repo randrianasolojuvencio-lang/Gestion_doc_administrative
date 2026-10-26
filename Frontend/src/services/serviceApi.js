@@ -33,7 +33,7 @@ export async function appelerApi(chemin, { headers, ...options } = {}) {
   return donnees;
 }
 
-// ===== Connexion =====
+// Connexion 
 // On demande d'abord le cookie de sécurité, puis on envoie l'e-mail et le mot de passe
 export async function seConnecter(emailPersonnel, motDePasse) {
   await fetch(ADRESSE_API + '/sanctum/csrf-cookie', { credentials: 'include' });
@@ -55,7 +55,7 @@ export const changerMotDePasse = (motDePasseActuel, nouveauMotDePasse) =>
     }),
   });
 
-// ===== Agents =====
+// Agents 
 export const listerAgents = () => appelerApi('/api/agents');
 
 export const creerAgent = (donnees) =>
@@ -70,9 +70,14 @@ export const changerEtatAgent = (cin, actif) =>
     body: JSON.stringify({ actif }),
   });
 
-// ===== Étudiants et inscriptions =====
-export const listerEtudiants = (recherche = '', page = 1) =>
-  appelerApi(`/api/etudiants?recherche=${encodeURIComponent(recherche)}&page=${page}`);
+export const listerEtudiants = (recherche = '', page = 1, filtres = {}) => {
+  const parametres = new URLSearchParams({ recherche, page });
+  // On n'envoie que les filtres choisis
+  for (const [cle, valeur] of Object.entries(filtres)) {
+    if (valeur) parametres.set(cle, valeur);
+  }
+  return appelerApi(`/api/etudiants?${parametres}`);
+};
 
 export const obtenirEtudiant = (numMatricule) =>
   appelerApi(`/api/etudiants/${encodeURIComponent(numMatricule)}`);
@@ -86,6 +91,9 @@ export const modifierEtudiant = (numMatricule, donnees) =>
     body: JSON.stringify(donnees),
   });
 
+export const supprimerEtudiant = (numMatricule) =>
+  appelerApi(`/api/etudiants/${encodeURIComponent(numMatricule)}`, { method: 'DELETE' });
+
 export const creerInscription = (numMatricule, donnees) =>
   appelerApi(`/api/etudiants/${encodeURIComponent(numMatricule)}/inscriptions`, {
     method: 'POST',
@@ -94,3 +102,18 @@ export const creerInscription = (numMatricule, donnees) =>
 
 // Listes de choix des formulaires : années, niveaux, parcours, groupes, statuts
 export const listerReferences = () => appelerApi('/api/references');
+
+// Données de base : administration, mentions, parcours, niveaux, groupes, années, statuts 
+export const listerDonneesBase = (rubrique) => appelerApi(`/api/donnees-base/${rubrique}`);
+
+export const creerDonneeBase = (rubrique, donnees) =>
+  appelerApi(`/api/donnees-base/${rubrique}`, { method: 'POST', body: JSON.stringify(donnees) });
+
+export const modifierDonneeBase = (rubrique, code, donnees) =>
+  appelerApi(`/api/donnees-base/${rubrique}/${encodeURIComponent(code)}`, {
+    method: 'PUT',
+    body: JSON.stringify(donnees),
+  });
+
+export const supprimerDonneeBase = (rubrique, code) =>
+  appelerApi(`/api/donnees-base/${rubrique}/${encodeURIComponent(code)}`, { method: 'DELETE' });

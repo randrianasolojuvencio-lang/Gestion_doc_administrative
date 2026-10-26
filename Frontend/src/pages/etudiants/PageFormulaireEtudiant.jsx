@@ -212,7 +212,10 @@ export default function PageFormulaireEtudiant() {
       } else {
         const etudiant = await creerEtudiant(donnees);
         navigate(`/etudiants/${encodeURIComponent(etudiant.num_matricule)}`, {
-          state: { message: 'L\'étudiant a été enregistré. Vous pouvez maintenant ajouter son inscription.' },
+          state: {
+            message: 'L\'étudiant a été enregistré. Complétez maintenant son inscription.',
+            ouvrirInscription: true,
+          },
         });
       }
     } catch (err) {
