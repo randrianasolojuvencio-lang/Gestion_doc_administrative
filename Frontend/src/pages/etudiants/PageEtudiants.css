@@ -8,3 +8,5 @@
 
 .pagination { display: flex; justify-content: flex-end; align-items: center; gap: .8rem; margin-top: 1rem; color: var(--couleur-secondaire); font-size: .88rem; }
 .barre-filtres { display: flex; align-items: center; gap: .8rem; margin-bottom: 1rem; color: var(--couleur-secondaire); font-size: .88rem; }
+
+.cellule-nom { display: flex; align-items: center; gap: .7rem; }

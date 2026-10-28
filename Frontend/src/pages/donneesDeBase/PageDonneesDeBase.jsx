@@ -19,25 +19,38 @@ function controlerChamp(champ, valeur) {
 }
 
 // ===== Formulaire d'ajout et de modification (même formulaire pour toutes les rubriques) =====
+// ===== Formulaire d'ajout et de modification (même formulaire pour toutes les rubriques) =====
 function FormulaireDonnee({ rubrique, element, dependances, surEnregistre, surAnnulation }) {
   const creation = element === null;
+  // Valeurs de départ : des textes, ou vrai/faux pour les cases à cocher
   const [valeurs, setValeurs] = useState(() =>
-    Object.fromEntries(rubrique.champs.map((champ) => [champ.nom, element?.[champ.nom] ?? '']))
+    Object.fromEntries(
+      rubrique.champs.map((champ) => {
+        const valeur = element?.[champ.nom];
+        if (champ.type === 'case') return [champ.nom, Boolean(valeur)];
+        return [champ.nom, valeur === null || valeur === undefined ? '' : String(valeur)];
+      })
+    )
   );
   const [tentative, setTentative] = useState(false);
   const [erreursServeur, setErreursServeur] = useState({});
   const [erreurGenerale, setErreurGenerale] = useState('');
   const [enCours, setEnCours] = useState(false);
 
-  // Erreur de contrôle de chaque champ
+  // Erreur de contrôle de chaque champ (une case à cocher n'a pas d'erreur possible)
   const erreurs = Object.fromEntries(
-    rubrique.champs.map((champ) => [champ.nom, controlerChamp(champ, valeurs[champ.nom].trim())])
+    rubrique.champs.map((champ) => [
+      champ.nom,
+      champ.type === 'case' ? '' : controlerChamp(champ, valeurs[champ.nom].trim()),
+    ])
   );
   // Message affiché sous un champ : contrôle local (après un clic sur Enregistrer), sinon erreur du serveur
   const message = (nom) => (tentative && erreurs[nom]) || erreursServeur[nom] || '';
 
   function modifierChamp(champ, valeur) {
-    const valeurFinale = champ.majuscules ? valeur.toUpperCase() : valeur;
+    let valeurFinale = valeur;
+    if (champ.majuscules) valeurFinale = valeurFinale.toUpperCase();
+    if (champ.type === 'nombre') valeurFinale = valeurFinale.replace(/\D/g, ''); // chiffres seulement
     setValeurs({ ...valeurs, [champ.nom]: valeurFinale });
     setErreursServeur({ ...erreursServeur, [champ.nom]: '' });
   }
@@ -52,9 +65,15 @@ function FormulaireDonnee({ rubrique, element, dependances, surEnregistre, surAn
       return;
     }
 
-    // Un champ vide est envoyé comme "pas de valeur" (null)
+    // Un champ vide est envoyé comme "pas de valeur" (null), un nombre comme un nombre
     const donnees = Object.fromEntries(
-      Object.entries(valeurs).map(([nom, valeur]) => [nom, valeur.trim() === '' ? null : valeur.trim()])
+      rubrique.champs.map((champ) => {
+        const valeur = valeurs[champ.nom];
+        if (champ.type === 'case') return [champ.nom, valeur];
+        const texte = valeur.trim();
+        if (texte === '') return [champ.nom, null];
+        return [champ.nom, champ.type === 'nombre' ? Number(texte) : texte];
+      })
     );
 
     setEnCours(true);
@@ -89,15 +108,33 @@ function FormulaireDonnee({ rubrique, element, dependances, surEnregistre, surAn
 
       <div className="grille-champs">
         {rubrique.champs.map((champ) => {
+          // Case à cocher : oui ou non
+          if (champ.type === 'case') {
+            return (
+              <div key={champ.nom} className="champ-formulaire champ-case">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={valeurs[champ.nom]}
+                    onChange={(e) => setValeurs({ ...valeurs, [champ.nom]: e.target.checked })}
+                  />
+                  {champ.libelle}
+                </label>
+              </div>
+            );
+          }
+
           const erreur = message(champ.nom);
           const desactive = !creation && champ.estCode; // le code ne change pas après l'ajout
 
-          // Choix d'une liste déroulante : valeurs fixes, ou éléments d'une autre rubrique
+          // Liste déroulante : valeurs fixes, ou éléments d'une autre rubrique
           let choix = null;
           let rubriqueSource = null;
           if (champ.type === 'choix') {
             if (champ.options) {
-              choix = champ.options.map((option) => ({ valeur: option, texte: option }));
+              choix = champ.options.map((option) =>
+                typeof option === 'string' ? { valeur: option, texte: option } : option
+              );
             } else {
               rubriqueSource = RUBRIQUES.find((r) => r.cle === champ.source);
               choix = (dependances[champ.source] ?? []).map((autre) => ({
@@ -126,6 +163,7 @@ function FormulaireDonnee({ rubrique, element, dependances, surEnregistre, surAn
                   value={valeurs[champ.nom]}
                   maxLength={champ.longueurMax}
                   disabled={desactive}
+                  inputMode={champ.type === 'nombre' ? 'numeric' : undefined}
                   placeholder={champ.exemple ? `Exemple : ${champ.exemple}` : undefined}
                   onChange={(e) => modifierChamp(champ, e.target.value)}
                   aria-invalid={Boolean(erreur)}

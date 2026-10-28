@@ -2,12 +2,13 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Search, UserPlus, GraduationCap, ChevronLeft, ChevronRight,
-  CircleAlert, CircleCheck, Plus, Pencil, Trash2, X,
+  CircleAlert, CircleCheck, Plus, Pencil, Trash2, X, FileText,
 } from 'lucide-react';
 import EtatVide from '../../composants/EtatVide';
 import EnteteFiltre from '../../composants/EnteteFiltre';
 import { listerEtudiants, supprimerEtudiant, listerReferences } from '../../services/serviceApi';
 import './PageEtudiants.css';
+import PhotoEtudiant from '../../composants/PhotoEtudiant';
 
 const FILTRES_VIDES = { niveau: '', parcours: '', groupe: '', annee: '' };
 
@@ -66,8 +67,8 @@ export default function PageEtudiants() {
   }, [rechercheEnvoyee, page, filtres, rechargement]);
 
   // Choix des listes de chaque en-tête
-  const optionsNiveaux = (references?.niveaux ?? []).map((n) => ({ valeur: n.code_niveau, texte: n.libelle_niveau }));
-  const optionsParcours = (references?.parcours ?? []).map((p) => ({ valeur: p.code_parcour, texte: p.libelle_parcour }));
+  const optionsNiveaux = (references?.niveaux ?? []).map((n) => ({ valeur: n.code_niveau, texte: `${n.code_niveau} · ${n.libelle_niveau}`, court: n.code_niveau }));
+  const optionsParcours = (references?.parcours ?? []).map((p) => ({ valeur: p.code_parcour, texte: `${p.code_parcour} · ${p.libelle_parcour}`, court: p.code_parcour }));
   const optionsGroupes = (references?.groupes ?? []).map((g) => ({ valeur: g.code_groupe, texte: g.libelle_groupe }));
   const optionsAnnees = (references?.annees ?? []).map((a) => ({
     valeur: a.code_annee_universitaire,
@@ -208,17 +209,20 @@ export default function PageEtudiants() {
                   return (
                     <tr key={etudiant.num_matricule}>
                       <td>{etudiant.num_matricule}</td>
-                      <td>
-                        <Link to={adresseFiche} className="lien-nom">
-                          {etudiant.nom} {etudiant.prenom}
-                        </Link>
+                                            <td>
+                        <div className="cellule-nom">
+                          <PhotoEtudiant numMatricule={etudiant.num_matricule} aPhoto={etudiant.a_photo} taille="petite" />
+                          <Link to={adresseFiche} className="lien-nom">
+                            {etudiant.nom} {etudiant.prenom}
+                          </Link>
+                        </div>
                       </td>
 
                       {/* Niveau, parcours, groupe et année : 4 cellules, ou une seule si pas d'inscription */}
                       {inscription ? (
                         <>
-                          <td>{inscription.niveau?.libelle_niveau}</td>
-                          <td>{inscription.parcours?.libelle_parcour}</td>
+                          <td title={inscription.niveau?.libelle_niveau}>{inscription.code_niveau}</td>
+                          <td title={inscription.parcours?.libelle_parcour}>{inscription.code_parcour}</td>
                           <td>{inscription.groupe?.libelle_groupe}</td>
                           <td>{inscription.code_annee_universitaire}</td>
                         </>
@@ -238,8 +242,11 @@ export default function PageEtudiants() {
                               <Plus size={15} aria-hidden="true" /> Inscrire
                             </Link>
                           )}
-                          <Link to={`${adresseFiche}/modifier`} className="bouton bouton-secondaire bouton-petit">
-                            <Pencil size={15} aria-hidden="true" /> Modifier
+                          <Link to={`/demandes/nouvelle?etudiant=${encodeURIComponent(etudiant.num_matricule)}`} className="bouton">
+                            <FileText size={16} aria-hidden="true" /> Nouvelle demande
+                          </Link>
+                          <Link to={`/etudiants/${encodeURIComponent(etudiant.num_matricule)}/modifier`} className="bouton bouton-secondaire">
+                          <Pencil size={16} aria-hidden="true" /> Modifier
                           </Link>
                           <button type="button" className="bouton bouton-danger bouton-petit" onClick={() => supprimer(etudiant)}>
                             <Trash2 size={15} aria-hidden="true" /> Supprimer

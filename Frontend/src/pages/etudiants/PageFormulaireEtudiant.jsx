@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Save, LoaderCircle, CircleAlert } from 'lucide-react';
-import { obtenirEtudiant, creerEtudiant, modifierEtudiant } from '../../services/serviceApi';
+import { ArrowLeft, Save, LoaderCircle, CircleAlert, ImagePlus } from 'lucide-react';
+import {
+  obtenirEtudiant, creerEtudiant, modifierEtudiant, envoyerPhotoEtudiant,
+} from '../../services/serviceApi';
+import PhotoEtudiant from '../../composants/PhotoEtudiant';
+import { controlerPhoto, reduirePhoto } from '../../utilitaires/photo';
 import './PageFormulaireEtudiant.css';
 
 // ===== Champs du formulaire, regroupés par section =====
@@ -120,6 +124,15 @@ export default function PageFormulaireEtudiant() {
   const [erreursServeur, setErreursServeur] = useState({});
   const [erreurGenerale, setErreurGenerale] = useState('');
   const [enCours, setEnCours] = useState(false);
+  const [photo, setPhoto] = useState(null);                  // photo choisie, déjà réduite
+  const [apercuPhoto, setApercuPhoto] = useState('');        // adresse locale pour l'aperçu
+  const [erreurPhoto, setErreurPhoto] = useState('');
+  const [photoActuelle, setPhotoActuelle] = useState(false); // l'étudiant a déjà une photo (modification)
+
+  // Libère l'aperçu précédent quand il change ou quand on quitte la page
+  useEffect(() => () => {
+    if (apercuPhoto) URL.revokeObjectURL(apercuPhoto);
+  }, [apercuPhoto]);
 
   const cheminRetour = modification ? `/etudiants/${encodeURIComponent(numMatricule)}` : '/etudiants';
 
@@ -131,6 +144,7 @@ export default function PageFormulaireEtudiant() {
       .then((etudiant) => {
         if (!annule) {
           setValeurs(versTextes(etudiant));
+          setPhotoActuelle(Boolean(etudiant.a_photo));
           setChargement(false);
         }
       })
@@ -184,6 +198,39 @@ export default function PageFormulaireEtudiant() {
     setTouches({ ...touches, [evenement.target.name]: true });
   }
 
+    // Choisit une photo : contrôle, réduction, aperçu
+  async function choisirPhoto(evenement) {
+    const fichier = evenement.target.files?.[0];
+    evenement.target.value = ''; // permet de rechoisir le même fichier
+    if (!fichier) return;
+
+    const message = controlerPhoto(fichier);
+    if (message) {
+      setErreurPhoto(message);
+      return;
+    }
+
+    try {
+      const reduite = await reduirePhoto(fichier);
+      setPhoto(reduite);
+      setApercuPhoto(URL.createObjectURL(reduite));
+      setErreurPhoto('');
+    } catch (err) {
+      setErreurPhoto(err.message || 'Cette photo ne peut pas être lue.');
+    }
+  }
+
+  // Envoie la photo choisie, s'il y en a une. Renvoie le message à afficher sur la fiche.
+  async function envoyerPhotoSiChoisie(numeroMatricule, messageSucces) {
+    if (!photo) return messageSucces;
+    try {
+      await envoyerPhotoEtudiant(numeroMatricule, photo);
+      return messageSucces;
+    } catch (err) {
+      return `${messageSucces} Mais la photo n'a pas pu être envoyée (${err.message}) : ajoutez-la depuis la fiche.`;
+    }
+  }
+
   async function soumettre(evenement) {
     evenement.preventDefault();
     setTentative(true);
@@ -208,14 +255,16 @@ export default function PageFormulaireEtudiant() {
     try {
       if (modification) {
         await modifierEtudiant(numMatricule, donnees);
-        navigate(cheminRetour, { state: { message: 'Les informations de l\'étudiant ont été enregistrées.' } });
+        const message = await envoyerPhotoSiChoisie(numMatricule, 'Les informations de l\'étudiant ont été enregistrées.');
+        navigate(cheminRetour, { state: { message } });
       } else {
         const etudiant = await creerEtudiant(donnees);
+        const message = await envoyerPhotoSiChoisie(
+          etudiant.num_matricule,
+          'L\'étudiant a été enregistré. Complétez maintenant son inscription.'
+        );
         navigate(`/etudiants/${encodeURIComponent(etudiant.num_matricule)}`, {
-          state: {
-            message: 'L\'étudiant a été enregistré. Complétez maintenant son inscription.',
-            ouvrirInscription: true,
-          },
+          state: { message, ouvrirInscription: true },
         });
       }
     } catch (err) {
@@ -285,6 +334,26 @@ export default function PageFormulaireEtudiant() {
                 : <Save size={18} aria-hidden="true" />}
               {modification ? 'Enregistrer les modifications' : 'Enregistrer l\'étudiant'}
             </button>
+
+            <fieldset>
+            <legend>Photo d'identité</legend>
+            <div className="zone-photo">
+              {apercuPhoto ? (
+                <img className="photo-etudiant photo-grande" src={apercuPhoto} alt="Aperçu de la photo choisie" />
+              ) : (
+                <PhotoEtudiant key={numMatricule ?? 'nouveau'} numMatricule={numMatricule} aPhoto={photoActuelle} taille="grande" />
+              )}
+              <div>
+                <label className="bouton bouton-secondaire bouton-petit bouton-fichier">
+                  <ImagePlus size={15} aria-hidden="true" />
+                  {apercuPhoto || photoActuelle ? 'Changer la photo' : 'Choisir une photo'}
+                  <input type="file" accept="image/jpeg,image/png" onChange={choisirPhoto} />
+                </label>
+                <p className="aide-champ">JPG ou PNG. Elle est réduite automatiquement avant l'envoi.</p>
+                {erreurPhoto && <p className="erreur-champ">{erreurPhoto}</p>}
+              </div>
+            </div>
+            </fieldset>
           </div>
         </form>
       </section>

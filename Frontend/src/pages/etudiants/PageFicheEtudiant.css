@@ -7,3 +7,11 @@
 
 .bloc-inscription { padding: 1.1rem; margin-bottom: 1.2rem; background: var(--couleur-fond); border: 1px solid var(--couleur-bordure); border-radius: 10px; }
 .mention { display: block; color: var(--couleur-secondaire); font-size: .8rem; }
+
+.fiche-identite { display: flex; gap: 1.8rem; align-items: flex-start; }
+.fiche-identite .liste-infos { flex: 1; }
+.bloc-photo { display: flex; flex-direction: column; align-items: flex-start; gap: .5rem; }
+@media (max-width: 800px) { .fiche-identite { flex-direction: column; } }
+
+.edition-bordereau { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; }
+.edition-bordereau input { width: 150px; padding: .35rem .5rem; border: 1px solid var(--couleur-bordure); border-radius: 6px; font-size: .85rem; }

@@ -5,12 +5,15 @@ import MiseEnPage from './composants/MiseEnPage';
 import PageConnexion from './pages/PageConnexion';
 import PageChangementMotDePasse from './pages/PageChangementMotDePasse';
 import PageAccueil from './pages/PageAccueil';
-import PageDemandes from './pages/PageDemandes';
 import PageAgents from './pages/PageAgents';
 import PageEtudiants from './pages/etudiants/PageEtudiants';
 import PageFormulaireEtudiant from './pages/etudiants/PageFormulaireEtudiant';
 import PageFicheEtudiant from './pages/etudiants/PageFicheEtudiant';
 import PageDonneesDeBase from './pages/donneesDeBase/PageDonneesDeBase';
+import PageDemandes from './pages/demandes/PageDemandes';
+import PageNouvelleDemande from './pages/demandes/PageNouvelleDemande';
+import PageFicheDemande from './pages/demandes/PageFicheDemande';
+import PageComptabilite from './pages/comptabilite/PageComptabilite';
 
 // Composant principal : choisit ce qu'on affiche selon l'état de l'agent
 export default function Application() {
@@ -46,17 +49,21 @@ export default function Application() {
       <Routes>
         <Route element={<MiseEnPage agent={agent} surDeconnexion={deconnecter} />}>
           <Route path="/" element={<PageAccueil agent={agent} />} />
-          <Route path="/demandes" element={<PageDemandes />} />
-          <Route path="/agents" element={<PageAgents agentConnecte={agent} />} />
 
-          {/* Étudiants : la même page sert à créer et à modifier (la clé évite de garder l'ancien état) */}
+          {/* Demandes de documents */}
+          <Route path="/demandes" element={<PageDemandes />} />
+          <Route path="/demandes/nouvelle" element={<PageNouvelleDemande />} />
+          <Route path="/demandes/:reference" element={<PageFicheDemande />} />
+
+          {/* Étudiants : la même page sert à créer et à modifier */}
           <Route path="/etudiants" element={<PageEtudiants />} />
           <Route path="/etudiants/nouveau" element={<PageFormulaireEtudiant key="creation" />} />
           <Route path="/etudiants/:numMatricule/modifier" element={<PageFormulaireEtudiant key="modification" />} />
           <Route path="/etudiants/:numMatricule" element={<PageFicheEtudiant />} />
 
-          {/* Données de base : la rubrique est facultative dans l'adresse */}
+          <Route path="/comptabilite" element={<PageComptabilite />} />
           <Route path="/donnees-de-base/:rubrique?" element={<PageDonneesDeBase />} />
+          <Route path="/agents" element={<PageAgents agentConnecte={agent} />} />
         </Route>
         {/* Toute autre adresse ramène au tableau de bord */}
         <Route path="*" element={<Navigate to="/" replace />} />

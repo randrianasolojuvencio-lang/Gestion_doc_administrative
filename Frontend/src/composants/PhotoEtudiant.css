@@ -1,0 +1,6 @@
+/* Photo d'identité au format portrait (3:4) */
+.photo-etudiant { display: block; flex-shrink: 0; object-fit: cover; border: 1px solid var(--couleur-bordure); border-radius: 10px; background: var(--couleur-accent-clair); }
+.photo-petite { width: 36px; height: 48px; border-radius: 6px; }
+.photo-moyenne { width: 96px; height: 128px; }
+.photo-grande { width: 180px; height: 240px; }
+.photo-vide { display: grid; place-items: center; color: var(--couleur-accent); }

@@ -1,4 +1,5 @@
-import { UserCog, Layers, GitBranch, GraduationCap, Users, CalendarDays, Tag } from 'lucide-react';
+import { UserCog, Layers, GitBranch, GraduationCap, Users, CalendarDays, Tag, FileText } from 'lucide-react';
+import { LIBELLES_FABRICANT, formaterMontant } from '../../utilitaires/formatage';
 
 // Règles de saisie communes
 const MOTIF_CODE = /^[A-Z0-9]+$/;
@@ -149,6 +150,36 @@ export const RUBRIQUES = [
     colonnes: [
       { libelle: 'Code', valeur: (l) => l.code_statut_inscription },
       { libelle: 'Libellé', valeur: (l) => l.libelle_statut_inscription },
+    ],
+  },
+    {
+    cle: 'types-documents',
+    titre: 'Types de documents',
+    Icone: FileText,
+    cleCode: 'code_doc',
+    description: 'Chaque type indique qui fabrique le document, son délai et si le visa du bureau 003 est nécessaire.',
+    dependances: [],
+    champs: [
+      champCode('code_doc', 6, 'RELNOT'),
+      { nom: 'libelle_doc', libelle: 'Libellé', requis: true, longueurMax: 40, exemple: 'Relevé de notes' },
+      {
+        nom: 'fabricant', libelle: 'Fabriqué par', requis: true, type: 'choix',
+        options: Object.entries(LIBELLES_FABRICANT).map(([valeur, texte]) => ({ valeur, texte })),
+      },
+      {
+        nom: 'delai', libelle: 'Délai (jours)', requis: true, type: 'nombre', longueurMax: 2, exemple: '7',
+        controle: (v) => (Number(v) >= 1 ? '' : 'Au moins 1 jour.'),
+      },
+      { nom: 'tarif', libelle: 'Tarif (Ar)', type: 'nombre', longueurMax: 7, exemple: '5000' },
+      { nom: 'visa_requis', libelle: 'Visa du bureau 003 nécessaire', type: 'case' },
+    ],
+    colonnes: [
+      { libelle: 'Code', valeur: (l) => l.code_doc },
+      { libelle: 'Libellé', valeur: (l) => l.libelle_doc },
+      { libelle: 'Fabriqué par', valeur: (l) => LIBELLES_FABRICANT[l.fabricant] ?? l.fabricant },
+      { libelle: 'Délai', valeur: (l) => `${l.delai} j` },
+      { libelle: 'Tarif', valeur: (l) => formaterMontant(l.tarif) },
+      { libelle: 'Visa 003', valeur: (l) => (l.visa_requis ? 'Oui' : 'Non') },
     ],
   },
 ];

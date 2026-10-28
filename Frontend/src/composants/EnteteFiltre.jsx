@@ -43,7 +43,7 @@ export default function EnteteFiltre({ libelle, libelleTous, valeur, options, su
         title={`Filtrer par ${libelle.toLowerCase()}`}
       >
         {libelle}
-        {choisie && <span className="entete-filtre-valeur">{choisie.texte}</span>}
+        {choisie && <span className="entete-filtre-valeur">{choisie.court ?? choisie.texte}</span>}
         <ChevronDown size={14} aria-hidden="true" />
       </button>
 

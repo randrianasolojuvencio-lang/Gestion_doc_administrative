@@ -12,3 +12,7 @@
 .aide-champ { margin: .25rem 0 0; color: var(--couleur-secondaire); font-size: .8rem; }
 
 .en-tete-panneau { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+
+/* Case à cocher dans un formulaire de données de base */
+.champ-case label { display: flex; align-items: center; gap: .5rem; margin: 1.7rem 0 0; font-weight: 600; cursor: pointer; }
+.champ-case input { width: auto; }

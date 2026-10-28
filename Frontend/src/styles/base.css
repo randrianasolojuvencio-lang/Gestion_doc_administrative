@@ -28,7 +28,7 @@ button { font: inherit; }
 .bouton-petit { padding: .3rem .65rem; border-width: 1.5px; font-size: .85rem; }
 
 /* Mise en page des pages */
-.page-contenu { max-width: 1100px; padding: 2rem; }
+.page-contenu { max-width: 1700px; padding: 2rem 2.5rem; }
 .en-tete-page { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
 .en-tete-page h1 { font-size: 1.6rem; }
 .sous-titre { margin: .2rem 0 0; color: var(--couleur-secondaire); font-size: .95rem; }
@@ -79,3 +79,20 @@ button { font: inherit; }
 
 /* Boutons d'action alignés dans une cellule de tableau */
 .actions-ligne { display: flex; flex-wrap: wrap; gap: .4rem; }
+
+/* Pastille du statut d'une demande */
+.badge-statut { display: inline-block; padding: .15rem .65rem; border-radius: 999px; background: var(--couleur-accent-clair); color: var(--couleur-accent); font-size: .8rem; font-weight: 600; white-space: nowrap; }
+
+/* Texte secondaire sous une valeur de tableau, et retard */
+.sous-ligne { display: block; color: var(--couleur-secondaire); font-size: .8rem; }
+.en-retard { color: var(--couleur-erreur); font-weight: 600; }
+
+/* Texte d'aide sous un champ */
+.aide-champ { margin: .25rem 0 0; color: var(--couleur-secondaire); font-size: .8rem; }
+
+/* Bouton qui ouvre le choix d'un fichier (le champ lui-même est caché) */
+.bouton-fichier { cursor: pointer; }
+.bouton-fichier input { display: none; }
+
+/* Montants : alignés à droite, chiffres de même largeur */
+.montant { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }

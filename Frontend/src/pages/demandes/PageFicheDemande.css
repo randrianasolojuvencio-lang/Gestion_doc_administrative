@@ -1,0 +1,20 @@
+.panneau-action { border: 2px solid var(--couleur-accent); }
+.panneau-action h2 { margin-bottom: .8rem; }
+.grille-action { max-width: 560px; margin-bottom: 1rem; }
+
+.deux-colonnes { display: grid; grid-template-columns: minmax(280px, 1fr) minmax(320px, 2fr); gap: 1.5rem; align-items: start; }
+@media (max-width: 900px) { .deux-colonnes { grid-template-columns: 1fr; } }
+
+.chronologie { margin: 0; padding: 0; list-style: none; }
+.etape { display: flex; gap: .8rem; align-items: flex-start; padding: .55rem 0; color: var(--couleur-secondaire); }
+.etape.atteinte { color: var(--couleur-texte); }
+.etape.atteinte svg { color: var(--couleur-accent); }
+.etape.courante strong { color: var(--couleur-accent); }
+.etape-date { display: block; color: var(--couleur-secondaire); font-size: .8rem; }
+
+.liste-infos-etroite { grid-template-columns: 1fr 1fr; }
+.sous-ligne-texte { display: block; }
+
+.verification-identite { display: flex; gap: 1.5rem; align-items: flex-start; margin-bottom: 1rem; }
+.case-verification { display: flex; align-items: center; gap: .5rem; margin: .8rem 0; font-weight: 600; cursor: pointer; }
+.case-verification input { width: auto; }

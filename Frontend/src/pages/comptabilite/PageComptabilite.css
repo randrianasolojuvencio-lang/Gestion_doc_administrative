@@ -1,0 +1,2 @@
+.filtres-periode { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 1rem; }
+.filtres-periode .champ-formulaire { min-width: 180px; }
